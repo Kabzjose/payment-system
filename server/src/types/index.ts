@@ -1,0 +1,65 @@
+export type PaymentStatus =
+  | 'requires_payment_method'
+  | 'requires_confirmation'
+  | 'requires_action'
+  | 'processing'
+  | 'succeeded'
+  | 'canceled'
+  | 'failed';
+
+export type PaymentMethodType = 'card' | 'mpesa';
+export type TransactionType = 'charge' | 'refund' | 'partial_refund';
+export type TransactionStatus = 'pending' | 'succeeded' | 'failed';
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  password_hash: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface Customer {
+  id: string;
+  user_id: string;
+  stripe_customer_id: string;
+  default_currency: string;
+  created_at: Date;
+}
+
+export interface PaymentIntent {
+  id: string;
+  user_id: string;
+  customer_id: string;
+  stripe_payment_intent_id: string | null;
+  amount: number;
+  currency: string;
+  status: PaymentStatus;
+  payment_method: PaymentMethodType;
+  metadata: Record<string, unknown>;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface Transaction {
+  id: string;
+  payment_intent_id: string;
+  amount: number;
+  currency: string;
+  type: TransactionType;
+  status: TransactionStatus;
+  stripe_charge_id: string | null;
+  created_at: Date;
+}
+
+export interface WebhookEvent {
+  id: string;
+  stripe_event_id: string;
+  event_type: string;
+  status: 'received' | 'processed' | 'failed' | 'ignored';
+  payload: Record<string, unknown>;
+  error: string | null;
+  processed_at: Date | null;
+  created_at: Date;
+}
