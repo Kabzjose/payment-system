@@ -2,6 +2,10 @@ import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import { rateLimit } from 'express-rate-limit';
+import { errorHandler } from './middleware/error.middleware';
+import authRoutes from './modules/auth/auth.routes';
+
+// Create Express app
 
 const app = express();
 
@@ -32,5 +36,11 @@ app.use('/webhooks', express.raw({ type: 'application/json' }));
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+// API routes
+app.use('/auth', authRoutes);
+
+// Global error handler
+app.use(errorHandler);
 
 export default app;
