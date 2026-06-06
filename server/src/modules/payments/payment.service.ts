@@ -10,7 +10,7 @@ export const paymentService = {
   // Get or create a Stripe customer for this user
   // Called before every payment — ensures every paying user has a Stripe customer
   async getOrCreateCustomer(userId: string) {
-    // Check our DB first — avoid unnecessary Stripe API calls
+    
     const existing = await customerRepository.findByUserId(userId);
     if (existing) return existing;
 
