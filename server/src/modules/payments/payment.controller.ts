@@ -20,7 +20,7 @@ export const paymentController = {
   async getPaymentIntent(req: Request, res: Response, next: NextFunction) {
     try {
       const result = await paymentService.getPaymentIntent(
-        req.params.id,
+        req.params.id as string,
         req.user!.userId
       );
       res.json({ success: true, data: result });
@@ -41,7 +41,7 @@ export const paymentController = {
   async refund(req: Request, res: Response, next: NextFunction) {
     try {
       const transaction = await paymentService.refund({
-        paymentIntentId: req.params.id,
+        paymentIntentId: req.params.id as string,
         userId: req.user!.userId,
         amount: req.body.amount,
         reason: req.body.reason,

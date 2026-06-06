@@ -4,6 +4,7 @@ import cors from 'cors';
 import { rateLimit } from 'express-rate-limit';
 import { errorHandler } from './middleware/error.middleware';
 import authRoutes from './modules/auth/auth.routes';
+import paymentRoutes from './modules/payments/payment.routes';
 
 // Create Express app
 
@@ -39,6 +40,9 @@ app.get('/health', (req, res) => {
 
 // API routes
 app.use('/auth', authRoutes);
+
+app.use('/payments', paymentRoutes);
+
 
 // Global error handler
 app.use(errorHandler);
