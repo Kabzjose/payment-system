@@ -22,10 +22,11 @@ export async function handlePaymentIntentFailed(
 
     await client.query(
       `UPDATE payment_intents
-       SET status = 'failed',
-           metadata = metadata || $2::jsonb,
-           updated_at = NOW()
-       WHERE id = $1`,
+      SET status = 'failed',
+    metadata = metadata || $2::jsonb,
+    updated_at = NOW()
+    WHERE id = $1
+    AND status IN ('pending', 'processing');`,
       [localId, JSON.stringify({ failure_message: failureMessage, failure_code: failureCode })]
     );
 

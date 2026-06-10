@@ -25,7 +25,8 @@ export async function handlePaymentIntentSucceeded(
     await client.query(
       `UPDATE payment_intents
        SET status = 'succeeded', updated_at = NOW()
-       WHERE id = $1`,
+       WHERE id = $1
+       AND status != 'succeeded'`, // idempotency safeguard
       [localId]
     );
 
