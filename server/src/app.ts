@@ -5,6 +5,7 @@ import { rateLimit } from 'express-rate-limit';
 import { errorHandler } from './middleware/error.middleware';
 import authRoutes from './modules/auth/auth.routes';
 import paymentRoutes from './modules/payments/payment.routes';
+import webhookRoutes from './modules/webhooks/webhook.routes';
 
 // Create Express app
 
@@ -42,6 +43,7 @@ app.get('/health', (req, res) => {
 app.use('/auth', authRoutes);
 
 app.use('/payments', paymentRoutes);
+app.use('/webhooks', webhookRoutes);
 
 
 // Global error handler
