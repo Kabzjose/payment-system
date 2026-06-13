@@ -32,18 +32,18 @@ export function Dashboard() {
     .reduce((sum, p) => sum + p.amount, 0);
 
   return (
-    <div className="min-h-screen bg-[#0E1116]">
+    <div className="min-h-screen bg-[#F8FAFC]">
       {/* Header */}
-      <header className="border-b border-white/10 px-4 sm:px-8 py-5 flex items-center justify-between">
+      <header className="border-b border-[#E2E8F0] px-4 sm:px-8 py-5 flex items-center justify-between bg-[#FFFFFF]">
         <div>
-          <div className="font-mono text-[11px] tracking-[0.2em] text-[#8B8578] uppercase mb-1">
+          <div className="font-mono text-[11px] tracking-[0.2em] text-[#64748B] uppercase mb-1">
             Ledger
           </div>
-          <div className="font-serif text-[#F7F5F0] text-lg">{user?.name}</div>
+          <div className="font-serif text-[#1E293B] text-lg">{user?.name}</div>
         </div>
         <button
           onClick={logout}
-          className="text-[12px] font-mono text-[#8B8578] hover:text-[#F7F5F0] transition-colors"
+          className="text-[12px] font-mono text-[#64748B] hover:text-[#3B82F6] transition-colors"
         >
           Sign out
         </button>
@@ -51,20 +51,20 @@ export function Dashboard() {
 
       <main className="max-w-2xl mx-auto px-4 sm:px-8 py-8 space-y-6">
         {/* New payment composer */}
-        <section className="bg-[#F7F5F0] rounded-lg p-5">
-          <h2 className="font-mono text-[11px] tracking-[0.15em] text-[#8B8578] uppercase mb-4">
+        <section className="bg-[#FFFFFF] rounded-lg p-5 border border-[#E2E8F0]">
+          <h2 className="font-mono text-[11px] tracking-[0.15em] text-[#64748B] uppercase mb-4">
             New payment
           </h2>
           <PaymentForm onSuccess={loadPayments} />
         </section>
 
         {/* Ledger */}
-        <section className="bg-[#F7F5F0] rounded-lg overflow-hidden">
-          <div className="px-5 py-4 border-b border-[#E5E2DA] flex items-center justify-between">
-            <h2 className="font-mono text-[11px] tracking-[0.15em] text-[#8B8578] uppercase">
+        <section className="bg-[#FFFFFF] rounded-lg overflow-hidden border border-[#E2E8F0]">
+          <div className="px-5 py-4 border-b border-[#E2E8F0] flex items-center justify-between">
+            <h2 className="font-mono text-[11px] tracking-[0.15em] text-[#64748B] uppercase">
               Transaction history
             </h2>
-            <span className="font-mono text-[11px] text-[#8B8578]">
+            <span className="font-mono text-[11px] text-[#64748B]">
               {totalCollected > 0
                 ? `${(totalCollected / 100).toLocaleString("en-US", {
                     style: "currency",
@@ -75,16 +75,16 @@ export function Dashboard() {
           </div>
 
           {loading && (
-            <p className="text-[13px] text-[#8B8578] px-5 py-6">Loading...</p>
+            <p className="text-[13px] text-[#64748B] px-5 py-6">Loading...</p>
           )}
 
           {error && !loading && (
-            <p className="text-[13px] text-[#C9402E] px-5 py-6">{error}</p>
+            <p className="text-[13px] text-[#DC2626] px-5 py-6">{error}</p>
           )}
 
           {!loading && !error && payments.length === 0 && (
             <div className="px-5 py-10 text-center">
-              <p className="text-[13px] text-[#8B8578]">
+              <p className="text-[13px] text-[#64748B]">
                 No payments yet. Make your first one above.
               </p>
             </div>

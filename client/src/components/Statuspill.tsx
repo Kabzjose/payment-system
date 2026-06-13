@@ -4,10 +4,10 @@ export function StatusPill({ status }: { status: string }) {
   const { label, tone } = statusConfig(status);
 
   const toneStyles: Record<string, string> = {
-    success: "bg-[#2D6A4F]/10 text-[#2D6A4F] border-[#2D6A4F]/20",
-    pending: "bg-[#E8C170]/15 text-[#9C7A1F] border-[#E8C170]/30",
-    failed: "bg-[#C9402E]/10 text-[#C9402E] border-[#C9402E]/20",
-    neutral: "bg-[#8B8578]/10 text-[#6B665C] border-[#8B8578]/20",
+    success: "bg-[#ECFDF5] text-[#047857] border-[#D1FAE5]",
+    pending: "bg-[#FFFBEB] text-[#92400E] border-[#FEE3B0]",
+    failed: "bg-[#FEE2E2] text-[#991B1B] border-[#FECACA]",
+    neutral: "bg-[#F1F5F9] text-[#475569] border-[#CBD5E1]",
   };
 
   return (
@@ -17,12 +17,12 @@ export function StatusPill({ status }: { status: string }) {
       <span
         className={`w-1.5 h-1.5 rounded-full ${
           tone === "success"
-            ? "bg-[#2D6A4F]"
+            ? "bg-[#10B981]"
             : tone === "pending"
-            ? "bg-[#E8C170] animate-pulse"
+            ? "bg-[#F59E0B] animate-pulse"
             : tone === "failed"
-            ? "bg-[#C9402E]"
-            : "bg-[#8B8578]"
+            ? "bg-[#EF4444]"
+            : "bg-[#94A3B8]"
         }`}
       />
       {label}

@@ -12,14 +12,14 @@ export function PaymentRow({
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center justify-between gap-4 px-4 py-3.5 text-left hover:bg-[#0E1116]/[0.02] transition-colors border-b border-[#E5E2DA] last:border-b-0"
+      className="w-full flex items-center justify-between gap-4 px-4 py-3.5 text-left hover:bg-[#F1F5F9] transition-colors border-b border-[#E2E8F0] last:border-b-0"
     >
       <div className="flex items-center gap-3 min-w-0">
         <div className="flex flex-col">
-          <span className="font-mono text-[11px] text-[#8B8578] truncate max-w-[140px]">
+          <span className="font-mono text-[11px] text-[#64748B] truncate max-w-[140px]">
             {payment.id}
           </span>
-          <span className="text-[12px] text-[#8B8578] mt-0.5">
+          <span className="text-[12px] text-[#64748B] mt-0.5">
             {formatDate(payment.created_at)}
           </span>
         </div>
@@ -27,9 +27,9 @@ export function PaymentRow({
 
       <div className="flex items-center gap-4 shrink-0">
         <StatusPill status={payment.status} />
-        <span className="font-serif text-lg text-[#0E1116] tabular-nums">
+        <span className="font-serif text-lg text-[#1E293B] tabular-nums">
           {formatAmount(payment.amount, payment.currency)}
-          <span className="font-mono text-[10px] text-[#8B8578] ml-1 align-super">
+          <span className="font-mono text-[10px] text-[#64748B] ml-1 align-super">
             {payment.currency.toUpperCase()}
           </span>
         </span>

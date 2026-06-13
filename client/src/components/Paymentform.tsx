@@ -14,10 +14,10 @@ const cardElementOptions = {
     base: {
       fontSize: "14px",
       fontFamily: '"IBM Plex Mono", monospace',
-      color: "#0E1116",
-      "::placeholder": { color: "#8B8578" },
+      color: "#1E293B",
+      "::placeholder": { color: "#CBD5E1" },
     },
-    invalid: { color: "#C9402E" },
+    invalid: { color: "#DC2626" },
   },
 };
 
@@ -87,30 +87,30 @@ function PaymentFormInner({ onSuccess }: { onSuccess: () => void }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-[12px] font-mono text-[#6B665C] mb-1.5">
+        <label className="block text-[12px] font-mono text-[#64748B] mb-1.5">
           Amount (USD)
         </label>
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 font-serif text-lg text-[#0E1116]">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 font-serif text-lg text-[#1E293B]">
             $
           </span>
           <input
             type="text"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-full pl-7 pr-3 py-2.5 rounded-md border border-[#D9D5CC] bg-white font-serif text-lg focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/30 focus:border-[#2D6A4F]"
+            className="w-full pl-7 pr-3 py-2.5 rounded-md border border-[#E2E8F0] bg-[#FFFFFF] font-serif text-lg text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/30 focus:border-[#3B82F6]"
           />
         </div>
       </div>
 
       <div>
-        <label className="block text-[12px] font-mono text-[#6B665C] mb-1.5">
+        <label className="block text-[12px] font-mono text-[#64748B] mb-1.5">
           Card details
         </label>
-        <div className="px-3 py-3 rounded-md border border-[#D9D5CC] bg-white">
+        <div className="px-3 py-3 rounded-md border border-[#E2E8F0] bg-[#FFFFFF]">
           <CardElement options={cardElementOptions} />
         </div>
-        <p className="mt-1.5 text-[11px] font-mono text-[#8B8578]">
+        <p className="mt-1.5 text-[11px] font-mono text-[#64748B]">
           Test: 4242 4242 4242 4242 · any future date · any CVC
         </p>
       </div>
@@ -119,8 +119,8 @@ function PaymentFormInner({ onSuccess }: { onSuccess: () => void }) {
         <div
           className={`text-[13px] rounded-md px-3 py-2 border ${
             message.type === "success"
-              ? "text-[#2D6A4F] bg-[#2D6A4F]/8 border-[#2D6A4F]/20"
-              : "text-[#C9402E] bg-[#C9402E]/8 border-[#C9402E]/20"
+              ? "text-[#047857] bg-[#ECFDF5] border-[#D1FAE5]"
+              : "text-[#DC2626] bg-[#FEE2E2] border-[#FECACA]"
           }`}
         >
           {message.text}
@@ -130,7 +130,7 @@ function PaymentFormInner({ onSuccess }: { onSuccess: () => void }) {
       <button
         type="submit"
         disabled={!stripe || submitting}
-        className="w-full py-2.5 rounded-md bg-[#0E1116] text-[#F7F5F0] text-[14px] font-medium hover:bg-[#1a1f28] transition-colors disabled:opacity-50"
+        className="w-full py-2.5 rounded-md bg-[#3B82F6] text-[#FFFFFF] text-[14px] font-medium hover:bg-[#2563EB] transition-colors disabled:opacity-50"
       >
         {submitting ? "Processing..." : `Pay $${amount || "0.00"}`}
       </button>
