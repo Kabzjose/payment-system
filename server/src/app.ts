@@ -15,7 +15,7 @@ const app = express();
 app.use(helmet());
 
 // CORS - allow requests from your frontend
-app.use(cors({ origin: process.env.FRONTEND_URL ?? '*' }));
+app.use(cors({ origin: process.env.FRONTEND_URL ?? 'http://localhost:5173' }));
 
 // Rate limiting - 100 requests per 15 minutes per IP
 app.use(rateLimit({
