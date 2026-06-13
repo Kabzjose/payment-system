@@ -2,7 +2,7 @@ import { loadStripe,type Stripe } from "@stripe/stripe-js";
 
 // Replace with YOUR publishable key from the Stripe dashboard (Developers → API keys)
 // This key is safe to expose in frontend code — it can only create charges, never read data
-const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+const STRIPE_PUBLISHABLE_KEY: string = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
 
 let stripePromise: Promise<Stripe | null> | null = null;
 
