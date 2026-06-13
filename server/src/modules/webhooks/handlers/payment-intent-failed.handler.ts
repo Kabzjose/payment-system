@@ -3,7 +3,7 @@ import { db } from '../../../config/db';
 import { logger } from '../../../utils/logger';
 
 export async function handlePaymentIntentFailed(
-  event: Stripe.PaymentIntentPaymentFailedEvent
+  event: Stripe.Event
 ): Promise<void> {
   const stripeIntent = event.data.object;
   const localId = stripeIntent.metadata?.localPaymentIntentId;

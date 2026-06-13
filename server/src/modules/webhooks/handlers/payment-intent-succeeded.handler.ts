@@ -4,9 +4,9 @@ import { paymentRepository } from '../../payments/payment.repository';
 import { logger } from '../../../utils/logger';
 
 export async function handlePaymentIntentSucceeded(
-  event: Stripe.PaymentIntentSucceededEvent
+  event: Stripe.Event
 ): Promise<void> {
-  const stripeIntent = event.data.object;
+  const stripeIntent = event.data.object as unknown as Stripe.PaymentIntent;
 
   // Get our local payment intent ID from Stripe's metadata
   // We stored this in Phase 4 when creating the intent
