@@ -26,4 +26,12 @@ export const env = {
   // Stripe
   STRIPE_SECRET_KEY: required('STRIPE_SECRET_KEY'),
   STRIPE_WEBHOOK_SECRET: required('STRIPE_WEBHOOK_SECRET'),
+
+  // Mpesa
+MPESA_CONSUMER_KEY: required('MPESA_CONSUMER_KEY'),
+MPESA_CONSUMER_SECRET: required('MPESA_CONSUMER_SECRET'),
+MPESA_SHORTCODE: required('MPESA_SHORTCODE'),
+MPESA_PASSKEY: required('MPESA_PASSKEY'),
+MPESA_CALLBACK_URL: required('MPESA_CALLBACK_URL'),
+MPESA_ENVIRONMENT: (process.env.MPESA_ENVIRONMENT ?? 'sandbox') as 'sandbox' | 'production',
 } as const;

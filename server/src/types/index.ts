@@ -63,3 +63,29 @@ export interface WebhookEvent {
   processed_at: Date | null;
   created_at: Date;
 }
+
+//mpesa
+export type MpesaPaymentStatus =
+  | 'pending'
+  | 'processing'
+  | 'succeeded'
+  | 'failed'
+  | 'cancelled';
+
+export interface MpesaPayment {
+  id: string;
+  user_id: string;
+  phone_number: string;
+  amount: number;
+  account_reference: string;
+  transaction_desc: string;
+  checkout_request_id: string;
+  merchant_request_id: string;
+  status: MpesaPaymentStatus;
+  mpesa_receipt_number: string | null;
+  result_code: number | null;
+  result_desc: string | null;
+  metadata: Record<string, unknown>;
+  created_at: Date;
+  updated_at: Date;
+}
