@@ -151,6 +151,14 @@ export const mpesaService = {
 
     logger.info({ CheckoutRequestID, ResultCode }, 'M-Pesa callback received');
 
+    const existing = await mpesaRepository.findByCheckoutRequestId(CheckoutRequestID);
+  if (!existing) {
+    logger.error({ CheckoutRequestID }, 'No mpesa_payment found for this CheckoutRequestID');
+    return;
+  }
+
+  logger.info({ found: existing.id, currentStatus: existing.status }, 'Found matching payment');
+
     // ResultCode 0 = success, anything else = failure
     if (ResultCode === 0) {
       // Extract the receipt number from the metadata items array
