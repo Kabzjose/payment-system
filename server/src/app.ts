@@ -43,9 +43,10 @@ app.get('/health', (req, res) => {
 // API routes
 app.use('/auth', authRoutes);
 
+app.use('/payments/mpesa', mpesaRoutes);
 app.use('/payments', paymentRoutes);
 app.use('/webhooks', webhookRoutes);
-app.use('/payments/mpesa', mpesaRoutes);
+
 
 
 // Global error handler
