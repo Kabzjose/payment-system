@@ -1,5 +1,5 @@
 import { type PaymentIntent } from "../lib/api";
-import { formatAmount, formatDate } from "../lib/format";
+import { type formatAmount, formatDate } from "../lib/format";
 import { StatusPill } from "./Statuspill";
 
 export function PaymentRow({
