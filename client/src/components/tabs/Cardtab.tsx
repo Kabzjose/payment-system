@@ -28,6 +28,7 @@ function CardTabInner({ onSuccess }: { onSuccess: () => void }) {
 
   const [amount, setAmount] = useState("20.00");
   const [submitting, setSubmitting] = useState(false);
+  const [cardReady, setCardReady] = useState(false);
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -35,10 +36,14 @@ function CardTabInner({ onSuccess }: { onSuccess: () => void }) {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!stripe || !elements || !token) return;
+    if (!stripe || !elements || !token || !cardReady) return;
 
+    // Get the element fresh at submit time
     const card = elements.getElement(CardElement);
-    if (!card) return;
+    if (!card) {
+      setMessage({ type: "error", text: "Card field not ready — please wait a moment." });
+      return;
+    }
 
     const cents = Math.round(parseFloat(amount) * 100);
     if (isNaN(cents) || cents < 50) {
@@ -50,13 +55,11 @@ function CardTabInner({ onSuccess }: { onSuccess: () => void }) {
     setMessage(null);
 
     try {
-      // Step 1: backend creates PaymentIntent, returns clientSecret
       const { clientSecret } = await api.createPaymentIntent(token, {
         amount: cents,
         currency: "usd",
       });
 
-      // Step 2: Stripe.js confirms with card details — card never touches backend
       const result = await stripe.confirmCardPayment(clientSecret, {
         payment_method: { card },
       });
@@ -67,6 +70,7 @@ function CardTabInner({ onSuccess }: { onSuccess: () => void }) {
         setMessage({ type: "success", text: "Payment succeeded" });
         card.clear();
         setAmount("20.00");
+        setTimeout(() => onSuccess(), 4000);
         onSuccess();
       } else {
         setMessage({
@@ -114,10 +118,16 @@ function CardTabInner({ onSuccess }: { onSuccess: () => void }) {
             Card details
           </label>
           <div className="px-3 py-3.5 rounded-md border border-[#D9D5CC] bg-white">
-            <CardElement options={CARD_ELEMENT_OPTIONS} />
+            <CardElement
+              options={CARD_ELEMENT_OPTIONS}
+              onReady={() => setCardReady(true)}
+              onFocus={() => setMessage(null)}
+            />
           </div>
           <p className="mt-1.5 text-[11px] font-mono text-[#8B8578]">
-            Test card: 4242 4242 4242 4242 · any future date · any CVC
+            {cardReady
+              ? "Test card: 4242 4242 4242 4242 · any future date · any CVC"
+              : "Loading card fields..."}
           </p>
         </div>
 
@@ -136,10 +146,14 @@ function CardTabInner({ onSuccess }: { onSuccess: () => void }) {
 
         <button
           type="submit"
-          disabled={!stripe || submitting}
+          disabled={!stripe || !cardReady || submitting}
           className="w-full py-2.5 rounded-md bg-[#0E1116] text-[#F7F5F0] text-[14px] font-medium hover:bg-[#1a1f28] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {submitting ? "Processing..." : `Pay $${amount || "0.00"}`}
+          {!cardReady
+            ? "Loading..."
+            : submitting
+            ? "Processing..."
+            : `Pay $${amount || "0.00"}`}
         </button>
       </form>
     </div>

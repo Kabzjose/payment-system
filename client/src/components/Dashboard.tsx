@@ -92,42 +92,45 @@ export function Dashboard() {
           ))}
         </div>
       </div>
+{/* Tab content */}
+<main className="max-w-2xl mx-auto px-4 sm:px-8 py-8">
+  {/* Card tab — always mounted, hidden when not active */}
+  <div className={activeTab === "card" ? "block" : "hidden"}>
+    <div className="bg-[#F7F5F0] rounded-lg p-6">
+      <h2 className="font-mono text-[11px] tracking-[0.15em] text-[#8B8578] uppercase mb-5">
+        Card payment
+      </h2>
+      <CardTab onSuccess={() => { refresh(); setActiveTab("history"); }} />
+    </div>
+  </div>
 
-      <main className="max-w-2xl mx-auto px-4 sm:px-8 py-8">
-        {activeTab === "card" && (
-          <div className="bg-[#F7F5F0] rounded-lg p-6">
-            <h2 className="font-mono text-[11px] tracking-[0.15em] text-[#8B8578] uppercase mb-5">
-              Card payment
-            </h2>
-            <CardTab onSuccess={() => { refresh(); setActiveTab("history"); }} />
-          </div>
-        )}
+  {/* M-Pesa tab — always mounted, hidden when not active */}
+  <div className={activeTab === "mpesa" ? "block" : "hidden"}>
+    <div className="bg-[#F7F5F0] rounded-lg p-6">
+      <h2 className="font-mono text-[11px] tracking-[0.15em] text-[#8B8578] uppercase mb-5">
+        M-Pesa payment
+      </h2>
+      <MpesaTab onSuccess={() => { refresh(); setActiveTab("history"); }} />
+    </div>
+  </div>
 
-        {activeTab === "mpesa" && (
-          <div className="bg-[#F7F5F0] rounded-lg p-6">
-            <h2 className="font-mono text-[11px] tracking-[0.15em] text-[#8B8578] uppercase mb-5">
-              M-Pesa payment
-            </h2>
-            <MpesaTab onSuccess={() => { refresh(); setActiveTab("history"); }} />
-          </div>
-        )}
-
-        {activeTab === "history" && (
-          <div className="bg-[#F7F5F0] rounded-lg overflow-hidden">
-            <div className="px-5 py-4 border-b border-[#E5E2DA]">
-              <h2 className="font-mono text-[11px] tracking-[0.15em] text-[#8B8578] uppercase">
-                Transaction history
-              </h2>
-            </div>
-            <HistoryTab
-              payments={unified}
-              loading={loading}
-              error={error}
-              onRefresh={refresh}
-            />
-          </div>
-        )}
-      </main>
+  {/* History tab — always mounted, hidden when not active */}
+  <div className={activeTab === "history" ? "block" : "hidden"}>
+    <div className="bg-[#F7F5F0] rounded-lg overflow-hidden">
+      <div className="px-5 py-4 border-b border-[#E5E2DA]">
+        <h2 className="font-mono text-[11px] tracking-[0.15em] text-[#8B8578] uppercase">
+          Transaction history
+        </h2>
+      </div>
+      <HistoryTab
+        payments={unified}
+        loading={loading}
+        error={error}
+        onRefresh={refresh}
+      />
+    </div>
+  </div>
+</main>
     </div>
   );
 }
