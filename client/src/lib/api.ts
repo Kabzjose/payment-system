@@ -1,4 +1,6 @@
-const BASE_URL = import.meta.env.VITE_API_URL ||"http://localhost:3000";
+const BASE_URL = "http://localhost:3000";
+
+// ─── Shared ───────────────────────────────────────────────────────────────────
 
 export interface User {
   id: string;
@@ -6,14 +8,18 @@ export interface User {
   name: string;
 }
 
-export interface PaymentIntent {
+// ─── Stripe types ─────────────────────────────────────────────────────────────
+
+export interface StripePayment {
   id: string;
-  amount: number;
+  amount: number;           // cents
   currency: string;
   status: string;
   stripe_payment_intent_id: string | null;
-  created_at: string;
+  payment_method: string;
   metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Transaction {
@@ -23,25 +29,63 @@ export interface Transaction {
   currency: string;
   type: "charge" | "refund" | "partial_refund";
   status: string;
+  stripe_charge_id: string | null;
   created_at: string;
 }
 
-export interface PaymentWithTransactions extends PaymentIntent {
+export interface StripePaymentWithTransactions extends StripePayment {
   transactions: Transaction[];
 }
 
-class ApiError extends Error {
-  status: number;
+// ─── M-Pesa types ─────────────────────────────────────────────────────────────
 
+export interface MpesaPayment {
+  id: string;
+  user_id: string;
+  phone_number: string;
+  amount: number;           // whole KES shillings
+  account_reference: string;
+  transaction_desc: string;
+  checkout_request_id: string | null;
+  merchant_request_id: string | null;
+  status: "pending" | "processing" | "succeeded" | "failed" | "cancelled";
+  mpesa_receipt_number: string | null;
+  result_code: number | null;
+  result_desc: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+// ─── Unified history type ─────────────────────────────────────────────────────
+// Used in the History tab to show both payment types in one list.
+// The "source" field tells us which type it is.
+
+export type UnifiedPayment =
+  | ({ source: "stripe" } & StripePayment)
+  | ({ source: "mpesa" } & MpesaPayment);
+
+// ─── Error class ──────────────────────────────────────────────────────────────
+
+export class ApiError extends Error {
+  // 1. Explicitly declare your properties
+  public override message: string;
+  public status: number;
+
+  // 2. Remove the access modifiers from the arguments
   constructor(message: string, status: number) {
     super(message);
+    
+    
+    this.message = message;
     this.status = status;
     this.name = "ApiError";
   }
 }
 
-// Reads the token from wherever the app stores it.
-// Passed in by the caller so this file has no dependency on React state.
+
+// ─── Core request helper ──────────────────────────────────────────────────────
+
 async function request<T>(
   path: string,
   options: RequestInit & { token?: string } = {}
@@ -67,7 +111,11 @@ async function request<T>(
   return data.data as T;
 }
 
+// ─── API methods ──────────────────────────────────────────────────────────────
+
 export const api = {
+
+  // Auth
   register(payload: { email: string; name: string; password: string }) {
     return request<{ user: User; token: string }>("/auth/register", {
       method: "POST",
@@ -86,31 +134,59 @@ export const api = {
     return request<{ user: User }>("/auth/me", { token });
   },
 
+  // Stripe payments
   createPaymentIntent(
     token: string,
     payload: { amount: number; currency: string; metadata?: Record<string, string> }
   ) {
-    return request<{ paymentIntent: PaymentIntent; clientSecret: string }>(
+    return request<{ paymentIntent: StripePayment; clientSecret: string }>(
       "/payments",
       { method: "POST", body: JSON.stringify(payload), token }
     );
   },
 
-  getPayments(token: string) {
-    return request<PaymentIntent[]>("/payments", { token });
+  getStripePayments(token: string) {
+    return request<StripePayment[]>("/payments", { token });
   },
 
-  getPayment(token: string, id: string) {
-    return request<PaymentWithTransactions>(`/payments/${id}`, { token });
+  getStripePayment(token: string, id: string) {
+    return request<StripePaymentWithTransactions>(`/payments/${id}`, { token });
   },
 
-  refund(token: string, id: string, payload?: { amount?: number; reason?: string }) {
+  refund(
+    token: string,
+    id: string,
+    payload?: { amount?: number; reason?: string }
+  ) {
     return request<Transaction>(`/payments/${id}/refund`, {
       method: "POST",
       body: JSON.stringify(payload ?? {}),
       token,
     });
   },
-};
 
-export { ApiError };
+  // M-Pesa payments
+  initiateMpesa(
+    token: string,
+    payload: {
+      phone: string;
+      amount: number;
+      account_reference?: string;
+      description?: string;
+    }
+  ) {
+    return request<MpesaPayment>("/payments/mpesa", {
+      method: "POST",
+      body: JSON.stringify(payload),
+      token,
+    });
+  },
+
+  getMpesaPayments(token: string) {
+    return request<MpesaPayment[]>("/payments/mpesa", { token });
+  },
+
+  getMpesaPayment(token: string, id: string) {
+    return request<MpesaPayment>(`/payments/mpesa/${id}`, { token });
+  },
+};
