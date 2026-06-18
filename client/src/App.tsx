@@ -5,12 +5,12 @@ import { Dashboard } from "./components/Dashboard";
 function AppContent() {
   const { user, loading } = useAuth();
 
-  // While we're checking sessionStorage for a saved token,
-  // show nothing rather than flashing the login screen then the dashboard.
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
-        <span className="font-mono text-[12px] text-[#64748B]">Loading...</span>
+      <div className="min-h-screen bg-[#0E1116] flex items-center justify-center">
+        <span className="font-mono text-[12px] text-[#8B8578] animate-pulse">
+          Loading...
+        </span>
       </div>
     );
   }
