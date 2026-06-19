@@ -5,6 +5,10 @@ import { webhookRepository } from './webhook.repository';
 import { handlePaymentIntentSucceeded } from './handlers/payment-intent-succeeded.handler';
 import { handlePaymentIntentFailed } from './handlers/payment-intent-failed.handler';
 import { handleChargeRefunded } from './handlers/charge-refunded.handler';
+import { handleSubscriptionUpdated } from './handlers/subscription-updated.handler';
+import { handleSubscriptionDeleted } from './handlers/subscription-deleted.handler';
+import { handleInvoicePaid } from './handlers/invoice-paid.handler';
+import { handleInvoicePaymentFailed } from './handlers/invoice-payment-failed.handler';
 import { AppError } from '../../utils/errors';
 import { logger } from '../../utils/logger';
 
@@ -13,6 +17,11 @@ const HANDLED_EVENTS = new Set([
   'payment_intent.succeeded',
   'payment_intent.payment_failed',
   'charge.refunded',
+   'customer.subscription.created',
+  'customer.subscription.updated',
+  'customer.subscription.deleted',
+  'invoice.paid',
+  'invoice.payment_failed',
 ]);
 
 export const webhookService = {
@@ -71,6 +80,22 @@ export const webhookService = {
 
         case 'charge.refunded':
           await handleChargeRefunded(event as Stripe.ChargeRefundedEvent);
+          break;
+          case 'customer.subscription.created':
+        case 'customer.subscription.updated':
+          await handleSubscriptionUpdated(event);
+          break;
+
+        case 'customer.subscription.deleted':
+          await handleSubscriptionDeleted(event);
+          break;
+
+        case 'invoice.paid':
+          await handleInvoicePaid(event);
+          break;
+
+        case 'invoice.payment_failed':
+          await handleInvoicePaymentFailed(event);
           break;
       }
 
