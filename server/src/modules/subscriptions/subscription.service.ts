@@ -8,6 +8,12 @@ import { userRepository } from '../users/user.repository';
 import { AppError } from '../../utils/errors';
 import { logger } from '../../utils/logger';
 
+// Add helper at top of file
+function toDate(unixSeconds: number | null | undefined): Date | undefined {
+  if (!unixSeconds || isNaN(unixSeconds)) return undefined;
+  return new Date(unixSeconds * 1000);
+}
+
 export const subscriptionService = {
 
   // ── Seed plans from env into DB ───────────────────────────────────────────
@@ -113,27 +119,27 @@ export const subscriptionService = {
       metadata: { userId: data.userId, planId: plan.id },
     });
 
+
+
+
     // 6. Save to our DB
-    const subscription = await subscriptionRepository.create({
-      user_id: data.userId,
-      plan_id: plan.id,
-      stripe_subscription_id: stripeSubscription.id,
-      stripe_customer_id: customer.stripe_customer_id,
-      stripe_price_id: plan.stripe_price_id,
-      status: stripeSubscription.status,
-      current_period_start: new Date(
-        stripeSubscription.current_period_start * 1000
-      ),
-      current_period_end: new Date(
-        stripeSubscription.current_period_end * 1000
-      ),
-      trial_start: stripeSubscription.trial_start
-        ? new Date(stripeSubscription.trial_start * 1000)
-        : undefined,
-      trial_end: stripeSubscription.trial_end
-        ? new Date(stripeSubscription.trial_end * 1000)
-        : undefined,
-    });
+  // Get period dates from items since that's where your Stripe version puts them
+const subscriptionItem = stripeSubscription.items?.data?.[0] as any;
+const periodStart = subscriptionItem?.current_period_start;
+const periodEnd = subscriptionItem?.current_period_end;
+
+const subscription = await subscriptionRepository.create({
+  user_id: data.userId,
+  plan_id: plan.id,
+  stripe_subscription_id: stripeSubscription.id,
+  stripe_customer_id: customer.stripe_customer_id,
+  stripe_price_id: plan.stripe_price_id,
+  status: stripeSubscription.status,
+  current_period_start: toDate(periodStart),
+  current_period_end: toDate(periodEnd),
+  trial_start: toDate(stripeSubscription.trial_start ?? undefined),
+  trial_end: toDate(stripeSubscription.trial_end ?? undefined),
+});
 
     // 7. Extract clientSecret if payment needs confirmation
     // (happens on first invoice for subscriptions)

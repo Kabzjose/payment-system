@@ -71,17 +71,16 @@ export const subscriptionRepository = {
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        RETURNING *`,
       [
-        data.user_id,
-        data.plan_id,
-        data.stripe_subscription_id,
-        data.stripe_customer_id,
-        data.stripe_price_id,
-        data.status,
-        data.current_period_start ?? null,
-        data.current_period_end ?? null,
-        data.trial_start ?? null,
-        data.trial_end ?? null,
-      ]
+        data.user_id,           
+      data.plan_id,           
+      data.stripe_subscription_id, 
+      data.stripe_customer_id,     
+      data.stripe_price_id,        
+      data.status,                 
+      data.current_period_start ?? null, 
+      data.current_period_end ?? null,   
+      data.trial_start ?? null,          
+      data.trial_end ?? null,         ]
     );
     return rows[0];
   },
