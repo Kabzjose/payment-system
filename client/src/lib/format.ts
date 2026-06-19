@@ -94,3 +94,41 @@ export function mpesaResultLabel(code: number | null): string {
   };
   return map[code] ?? `Error code ${code}`;
 }
+// ─── Subscription formatters ──────────────────────────────────────────────────
+
+// Formats billing interval: "month" + 1 → "Monthly", "year" + 1 → "Yearly"
+// "month" + 3 → "Every 3 months"
+export function formatInterval(interval: string, intervalCount: number): string {
+  if (intervalCount === 1) {
+    return interval === "month" ? "Monthly" : "Yearly";
+  }
+  return `Every ${intervalCount} ${interval}s`;
+}
+
+// Formats a subscription period end date as a billing date
+// e.g. "Aug 19, 2026"
+export function formatBillingDate(isoString: string | null): string {
+  if (!isoString) return "—";
+  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(
+    new Date(isoString)
+  );
+}
+
+// Maps subscription status to display config
+// Reuses the same StatusTone type from payment statuses
+const SUBSCRIPTION_STATUS_MAP: Record<string, { label: string; tone: StatusTone }> = {
+  active:             { label: "Active",          tone: "success" },
+  trialing:           { label: "Trial",           tone: "pending" },
+  past_due:           { label: "Past due",        tone: "failed"  },
+  unpaid:             { label: "Unpaid",          tone: "failed"  },
+  canceled:           { label: "Canceled",        tone: "neutral" },
+  incomplete:         { label: "Incomplete",      tone: "neutral" },
+  incomplete_expired: { label: "Expired",         tone: "failed"  },
+  paused:             { label: "Paused",          tone: "neutral" },
+};
+
+export function subscriptionStatusConfig(
+  status: string
+): { label: string; tone: StatusTone } {
+  return SUBSCRIPTION_STATUS_MAP[status] ?? { label: status, tone: "neutral" };
+}
