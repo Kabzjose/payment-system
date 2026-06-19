@@ -94,10 +94,17 @@ function PricingPage({ onSelectPlan }: { onSelectPlan: (plan: Plan) => void }) {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { token } = useAuth();
 
   useEffect(() => {
+      if (!token) {
+    setError("Not authenticated");
+    setLoading(false);
+    return;
+  }
+
     api
-      .getPlans()
+      .getPlans(token)
       .then(setPlans)
       .catch((err: unknown) =>
         setError(err instanceof ApiError ? err.message : "Failed to load plans")
@@ -412,10 +419,17 @@ function ChangePlanModal({
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState<string | null>(null); // planId being submitted
   const [error, setError] = useState<string | null>(null);
+   const { token } = useAuth();
 
   useEffect(() => {
+      if (!token) {
+    setError("Not authenticated");
+    setLoading(false);
+    return;
+  }
+
     api
-      .getPlans()
+      .getPlans(token)
       .then(setPlans)
       .catch(() => setError("Failed to load plans"))
       .finally(() => setLoading(false));

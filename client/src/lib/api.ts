@@ -230,8 +230,8 @@ export const api = {
   },
 
   // ── Subscriptions ─────────────────────────────────────────────────────────
-  getPlans() {
-    return request<Plan[]>("/subscriptions/plans");
+  getPlans(token: string) {
+    return request<Plan[]>("/subscriptions/plans", { token });
   },
 
   createSubscription(
