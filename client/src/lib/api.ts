@@ -68,18 +68,18 @@ export type UnifiedPayment =
 // ─── Error class ──────────────────────────────────────────────────────────────
 
 export class ApiError extends Error {
-  // 1. Explicitly declare your properties
-  public override message: string;
-  public status: number;
+  // 1. Explicitly declare properties so they are purely type annotations
+  status: number;
 
-  // 2. Remove the access modifiers from the arguments
   constructor(message: string, status: number) {
     super(message);
-    
-    
-    this.message = message;
-    this.status = status;
     this.name = "ApiError";
+    
+    // 2. Assign the value manually inside the constructor body
+    this.status = status;
+
+    // Fixes the prototype chain inheritance for older JS runtimes
+    Object.setPrototypeOf(this, ApiError.prototype);
   }
 }
 
@@ -191,6 +191,8 @@ export const api = {
   },
 };
 
+// ─── Subscription types ───────────────────────────────────────────────────────
+
 export interface Plan {
   id: string;
   name: string;
@@ -204,7 +206,7 @@ export interface Plan {
   trial_period_days: number;
   active: boolean;
 }
- 
+
 export interface Subscription {
   id: string;
   user_id: string;
@@ -221,15 +223,15 @@ export interface Subscription {
   updated_at: string;
   plan: Plan;   // nested — returned by the JOIN in subscription.repository
 }
- 
+
 // ─── Subscription API methods ─────────────────────────────────────────────────
- 
+
 Object.assign(api, {
- 
+
   getPlans() {
     return request<Plan[]>("/subscriptions/plans");
   },
- 
+
   createSubscription(
     token: string,
     payload: { plan_id: string; payment_method_id: string }
@@ -239,15 +241,15 @@ Object.assign(api, {
       { method: "POST", body: JSON.stringify(payload), token }
     );
   },
- 
+
   getUserSubscriptions(token: string) {
     return request<Subscription[]>("/subscriptions", { token });
   },
- 
+
   getSubscription(token: string, id: string) {
     return request<Subscription>(`/subscriptions/${id}`, { token });
   },
- 
+
   cancelSubscription(
     token: string,
     id: string,
@@ -259,7 +261,7 @@ Object.assign(api, {
       token,
     });
   },
- 
+
   changePlan(token: string, id: string, payload: { plan_id: string }) {
     return request<Subscription>(`/subscriptions/${id}/change-plan`, {
       method: "POST",
@@ -267,5 +269,5 @@ Object.assign(api, {
       token,
     });
   },
- 
+
 });
