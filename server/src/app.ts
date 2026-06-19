@@ -7,6 +7,7 @@ import authRoutes from './modules/auth/auth.routes';
 import paymentRoutes from './modules/payments/payment.routes';
 import webhookRoutes from './modules/webhooks/webhook.routes';
 import mpesaRoutes from './modules/mpesa/mpesa.routes';
+import subscriptionRoutes from './modules/subscriptions/subscription.routes';
 
 // Create Express app
 
@@ -46,6 +47,7 @@ app.use('/auth', authRoutes);
 app.use('/payments/mpesa', mpesaRoutes);
 app.use('/payments', paymentRoutes);
 app.use('/webhooks', webhookRoutes);
+app.use('/subscriptions', subscriptionRoutes);
 
 
 
