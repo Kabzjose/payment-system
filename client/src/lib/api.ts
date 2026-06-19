@@ -190,3 +190,82 @@ export const api = {
     return request<MpesaPayment>(`/payments/mpesa/${id}`, { token });
   },
 };
+
+export interface Plan {
+  id: string;
+  name: string;
+  description: string | null;
+  stripe_price_id: string;
+  stripe_product_id: string;
+  amount: number;       // cents
+  currency: string;
+  interval: "month" | "year";
+  interval_count: number;
+  trial_period_days: number;
+  active: boolean;
+}
+ 
+export interface Subscription {
+  id: string;
+  user_id: string;
+  plan_id: string;
+  stripe_subscription_id: string;
+  status: "incomplete" | "incomplete_expired" | "trialing" | "active" | "past_due" | "canceled" | "unpaid" | "paused";
+  current_period_start: string | null;
+  current_period_end: string | null;
+  cancel_at_period_end: boolean;
+  canceled_at: string | null;
+  trial_start: string | null;
+  trial_end: string | null;
+  created_at: string;
+  updated_at: string;
+  plan: Plan;   // nested — returned by the JOIN in subscription.repository
+}
+ 
+// ─── Subscription API methods ─────────────────────────────────────────────────
+ 
+Object.assign(api, {
+ 
+  getPlans() {
+    return request<Plan[]>("/subscriptions/plans");
+  },
+ 
+  createSubscription(
+    token: string,
+    payload: { plan_id: string; payment_method_id: string }
+  ) {
+    return request<{ subscription: Subscription; clientSecret: string | null }>(
+      "/subscriptions",
+      { method: "POST", body: JSON.stringify(payload), token }
+    );
+  },
+ 
+  getUserSubscriptions(token: string) {
+    return request<Subscription[]>("/subscriptions", { token });
+  },
+ 
+  getSubscription(token: string, id: string) {
+    return request<Subscription>(`/subscriptions/${id}`, { token });
+  },
+ 
+  cancelSubscription(
+    token: string,
+    id: string,
+    payload: { immediately: boolean }
+  ) {
+    return request<Subscription>(`/subscriptions/${id}/cancel`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+      token,
+    });
+  },
+ 
+  changePlan(token: string, id: string, payload: { plan_id: string }) {
+    return request<Subscription>(`/subscriptions/${id}/change-plan`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+      token,
+    });
+  },
+ 
+});
