@@ -1,4 +1,4 @@
-import { useState,type FormEvent } from "react";
+import { useState, useEffect,type FormEvent } from "react";
 import {
   Elements,
   CardElement,
@@ -8,12 +8,12 @@ import {
 import { getStripe } from "../../lib/stripe";
 import { useAuth } from "../../lib/auth";
 import { useSubscription } from "../../hooks/useSubscription";
-import {api,type Plan,type Subscription, ApiError,} from "../../lib/api";
+import {api,type Plan,type Subscription,ApiError,} from "../../lib/api";
 import {
   formatStripeAmount,
   formatInterval,
   formatBillingDate,
-  subscriptionStatusConfig,
+  
 } from "../../lib/format";
 import { StatusPill } from "../Statuspill";
 
@@ -95,15 +95,16 @@ function PricingPage({ onSelectPlan }: { onSelectPlan: (plan: Plan) => void }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useState(() => {
+  useEffect(() => {
     api
       .getPlans()
       .then(setPlans)
-      .catch((err) =>
+      .catch((err: unknown) =>
         setError(err instanceof ApiError ? err.message : "Failed to load plans")
       )
       .finally(() => setLoading(false));
-  });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (loading) {
     return (
@@ -198,7 +199,7 @@ function CheckoutFormInner({
       }
 
       // Step 2: send payment method ID + plan ID to your backend
-      const { subscription, clientSecret } = await api.createSubscription(
+      const { clientSecret } = await api.createSubscription(
         token,
         {
           plan_id: plan.id,
@@ -412,20 +413,21 @@ function ChangePlanModal({
   const [submitting, setSubmitting] = useState<string | null>(null); // planId being submitted
   const [error, setError] = useState<string | null>(null);
 
-  useState(() => {
+  useEffect(() => {
     api
       .getPlans()
       .then(setPlans)
       .catch(() => setError("Failed to load plans"))
       .finally(() => setLoading(false));
-  });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleSelect(planId: string) {
     setSubmitting(planId);
     setError(null);
     try {
       await onChangePlan(planId);
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof ApiError ? err.message : "Plan change failed");
       setSubmitting(null);
     }
@@ -517,7 +519,7 @@ function ActiveSubscriptionCard({
   const { token } = useAuth();
   const [showCancel, setShowCancel] = useState(false);
   const [showChangePlan, setShowChangePlan] = useState(false);
-  const { label, tone } = subscriptionStatusConfig(subscription.status);
+  
 
   const isCanceling = subscription.cancel_at_period_end;
   const isActive = ["active", "trialing"].includes(subscription.status);

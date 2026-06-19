@@ -12,7 +12,7 @@ export interface User {
 
 export interface StripePayment {
   id: string;
-  amount: number;           // cents
+  amount: number;
   currency: string;
   status: string;
   stripe_payment_intent_id: string | null;
@@ -43,7 +43,7 @@ export interface MpesaPayment {
   id: string;
   user_id: string;
   phone_number: string;
-  amount: number;           // whole KES shillings
+  amount: number;
   account_reference: string;
   transaction_desc: string;
   checkout_request_id: string | null;
@@ -58,12 +58,51 @@ export interface MpesaPayment {
 }
 
 // ─── Unified history type ─────────────────────────────────────────────────────
-// Used in the History tab to show both payment types in one list.
-// The "source" field tells us which type it is.
 
 export type UnifiedPayment =
   | ({ source: "stripe" } & StripePayment)
   | ({ source: "mpesa" } & MpesaPayment);
+
+// ─── Subscription types ───────────────────────────────────────────────────────
+
+export interface Plan {
+  id: string;
+  name: string;
+  description: string | null;
+  stripe_price_id: string;
+  stripe_product_id: string;
+  amount: number;
+  currency: string;
+  interval: "month" | "year";
+  interval_count: number;
+  trial_period_days: number;
+  active: boolean;
+}
+
+export interface Subscription {
+  id: string;
+  user_id: string;
+  plan_id: string;
+  stripe_subscription_id: string;
+  status:
+    | "incomplete"
+    | "incomplete_expired"
+    | "trialing"
+    | "active"
+    | "past_due"
+    | "canceled"
+    | "unpaid"
+    | "paused";
+  current_period_start: string | null;
+  current_period_end: string | null;
+  cancel_at_period_end: boolean;
+  canceled_at: string | null;
+  trial_start: string | null;
+  trial_end: string | null;
+  created_at: string;
+  updated_at: string;
+  plan: Plan;
+}
 
 // ─── Error class ──────────────────────────────────────────────────────────────
 
@@ -111,11 +150,11 @@ async function request<T>(
   return data.data as T;
 }
 
-// ─── API methods ──────────────────────────────────────────────────────────────
+// ─── API — all methods in one object so TypeScript knows the full type ────────
 
 export const api = {
 
-  // Auth
+  // ── Auth ──────────────────────────────────────────────────────────────────
   register(payload: { email: string; name: string; password: string }) {
     return request<{ user: User; token: string }>("/auth/register", {
       method: "POST",
@@ -134,10 +173,14 @@ export const api = {
     return request<{ user: User }>("/auth/me", { token });
   },
 
-  // Stripe payments
+  // ── Stripe payments ───────────────────────────────────────────────────────
   createPaymentIntent(
     token: string,
-    payload: { amount: number; currency: string; metadata?: Record<string, string> }
+    payload: {
+      amount: number;
+      currency: string;
+      metadata?: Record<string, string>;
+    }
   ) {
     return request<{ paymentIntent: StripePayment; clientSecret: string }>(
       "/payments",
@@ -153,11 +196,7 @@ export const api = {
     return request<StripePaymentWithTransactions>(`/payments/${id}`, { token });
   },
 
-  refund(
-    token: string,
-    id: string,
-    payload?: { amount?: number; reason?: string }
-  ) {
+  refund(token: string, id: string, payload?: { amount?: number; reason?: string }) {
     return request<Transaction>(`/payments/${id}/refund`, {
       method: "POST",
       body: JSON.stringify(payload ?? {}),
@@ -165,7 +204,7 @@ export const api = {
     });
   },
 
-  // M-Pesa payments
+  // ── M-Pesa payments ───────────────────────────────────────────────────────
   initiateMpesa(
     token: string,
     payload: {
@@ -189,45 +228,8 @@ export const api = {
   getMpesaPayment(token: string, id: string) {
     return request<MpesaPayment>(`/payments/mpesa/${id}`, { token });
   },
-};
 
-// ─── Subscription types ───────────────────────────────────────────────────────
-
-export interface Plan {
-  id: string;
-  name: string;
-  description: string | null;
-  stripe_price_id: string;
-  stripe_product_id: string;
-  amount: number;       // cents
-  currency: string;
-  interval: "month" | "year";
-  interval_count: number;
-  trial_period_days: number;
-  active: boolean;
-}
-
-export interface Subscription {
-  id: string;
-  user_id: string;
-  plan_id: string;
-  stripe_subscription_id: string;
-  status: "incomplete" | "incomplete_expired" | "trialing" | "active" | "past_due" | "canceled" | "unpaid" | "paused";
-  current_period_start: string | null;
-  current_period_end: string | null;
-  cancel_at_period_end: boolean;
-  canceled_at: string | null;
-  trial_start: string | null;
-  trial_end: string | null;
-  created_at: string;
-  updated_at: string;
-  plan: Plan;   // nested — returned by the JOIN in subscription.repository
-}
-
-// ─── Subscription API methods ─────────────────────────────────────────────────
-
-Object.assign(api, {
-
+  // ── Subscriptions ─────────────────────────────────────────────────────────
   getPlans() {
     return request<Plan[]>("/subscriptions/plans");
   },
@@ -269,5 +271,4 @@ Object.assign(api, {
       token,
     });
   },
-
-});
+};
