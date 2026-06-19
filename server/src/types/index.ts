@@ -64,6 +64,56 @@ export interface WebhookEvent {
   created_at: Date;
 }
 
+export interface Plan {
+  id: string;
+  name: string;
+  description: string | null;
+  stripe_product_id: string;
+  stripe_price_id: string;
+  amount: number;
+  currency: string;
+  interval: 'month' | 'year';
+  interval_count: number;
+  trial_period_days: number;
+  active: boolean;
+  metadata: Record<string, unknown>;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export type SubscriptionStatus =
+  | 'incomplete'
+  | 'incomplete_expired'
+  | 'trialing'
+  | 'active'
+  | 'past_due'
+  | 'canceled'
+  | 'unpaid'
+  | 'paused';
+
+export interface Subscription {
+  id: string;
+  user_id: string;
+  plan_id: string;
+  stripe_subscription_id: string;
+  stripe_customer_id: string;
+  stripe_price_id: string;
+  status: SubscriptionStatus;
+  current_period_start: Date | null;
+  current_period_end: Date | null;
+  cancel_at_period_end: boolean;
+  canceled_at: Date | null;
+  trial_start: Date | null;
+  trial_end: Date | null;
+  metadata: Record<string, unknown>;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface SubscriptionWithPlan extends Subscription {
+  plan: Plan;
+}
+
 //mpesa
 export type MpesaPaymentStatus =
   | 'pending'
