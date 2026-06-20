@@ -1,21 +1,17 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../lib/auth";
-import { api,type  MpesaPayment, ApiError } from "../../lib/api";
-import {
-  formatMpesaAmount,
-  formatDate,
-  formatPhone,
-  mpesaResultLabel,
-} from "../../lib/format";
-import { StatusPill } from "../Statuspill";
+import { api, type MpesaPayment, ApiError } from "../../lib/api";
+import { formatMpesaAmount, formatDate, formatPhone, mpesaResultLabel } from "../../lib/format";
+import { StatusBadge } from "../ui/StatusBadge";
+import { LoadingSkeleton } from "../ui/LoadingSkeleton";
+import { Modal, ModalHeader } from "../ui/Modal";
 
-export function MpesaDetail({
-  paymentId,
-  onClose,
-}: {
-  paymentId: string;
-  onClose: () => void;
-}) {
+const MpesaBadge = () => (
+  <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded"
+    style={{ background: "rgba(16,185,129,0.12)", color: "#34D399" }}>MPESA</span>
+);
+
+export function MpesaDetail({ paymentId, onClose }: { paymentId: string; onClose: () => void }) {
   const { token } = useAuth();
   const [payment, setPayment] = useState<MpesaPayment | null>(null);
   const [loading, setLoading] = useState(true);
@@ -23,126 +19,66 @@ export function MpesaDetail({
 
   useEffect(() => {
     if (!token) return;
-    api
-      .getMpesaPayment(token, paymentId)
-      .then(setPayment)
-      .catch((err) =>
-        setError(err instanceof ApiError ? err.message : "Failed to load")
-      )
+    api.getMpesaPayment(token, paymentId).then(setPayment)
+      .catch((err) => setError(err instanceof ApiError ? err.message : "Failed to load"))
       .finally(() => setLoading(false));
   }, [token, paymentId]);
 
+  const detailRows = payment ? [
+    { label: "Phone", value: formatPhone(payment.phone_number) },
+    { label: "Reference", value: payment.account_reference },
+    { label: "Description", value: payment.transaction_desc },
+    { label: "Date", value: formatDate(payment.created_at) },
+    ...(payment.checkout_request_id ? [{ label: "Checkout ID", value: payment.checkout_request_id }] : []),
+  ] : [];
+
   return (
-    <div className="fixed inset-0 bg-[#0E1116]/40 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
-      <div className="w-full sm:max-w-md bg-[#F7F5F0] rounded-t-xl sm:rounded-xl max-h-[85vh] overflow-y-auto">
-        {/* Header */}
-        <div className="sticky top-0 bg-[#F7F5F0] border-b border-[#E5E2DA] px-5 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-[#fffbeb] text-[#9C7A1F] border border-[#fcd34d]/40">
-              MPESA
-            </span>
-            <span className="font-mono text-[11px] text-[#8B8578]">
-              Payment detail
-            </span>
-          </div>
-          <button
-            onClick={onClose}
-            className="text-[#8B8578] hover:text-[#0E1116] text-xl leading-none"
-          >
-            &times;
-          </button>
-        </div>
-
-        <div className="p-5 space-y-5">
-          {loading && (
-            <p className="text-[13px] text-[#8B8578]">Loading...</p>
-          )}
-
-          {error && (
-            <div className="text-[13px] text-[#C9402E] bg-[#C9402E]/8 border border-[#C9402E]/20 rounded-md px-3 py-2">
-              {error}
+    <Modal onClose={onClose}>
+      <ModalHeader title="M-Pesa Detail" subtitle={paymentId} badge={<MpesaBadge />} onClose={onClose} />
+      <div className="p-5 space-y-5">
+        {loading && <LoadingSkeleton variant="detail" />}
+        {error && (
+          <div className="rounded-lg px-4 py-3 text-sm" style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", color: "#F87171" }}>{error}</div>
+        )}
+        {payment && (
+          <>
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-3xl font-mono font-semibold tabular-nums" style={{ color: "var(--text-primary)" }}>{formatMpesaAmount(payment.amount)}</p>
+                <p className="text-[10px] font-mono mt-1" style={{ color: "var(--text-label)" }}>{payment.id}</p>
+              </div>
+              <StatusBadge status={payment.status} />
             </div>
-          )}
 
-          {payment && (
-            <>
-              {/* Amount + status */}
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="font-serif text-3xl text-[#0E1116] tabular-nums">
-                    {formatMpesaAmount(payment.amount)}
-                  </div>
-                  <div className="font-mono text-[11px] text-[#8B8578] mt-1">
-                    {payment.id}
-                  </div>
+            <div style={{ borderTop: "1px solid var(--border)" }} />
+
+            <div className="rounded-xl overflow-hidden" style={{ border: "1px solid var(--border)" }}>
+              {detailRows.map((row, i) => (
+                <div key={row.label} className="flex justify-between items-center px-4 py-3"
+                  style={{ borderBottom: i < detailRows.length - 1 ? "1px solid var(--border)" : "none", background: "var(--bg-elevated)" }}>
+                  <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>{row.label}</span>
+                  <span className="text-xs font-mono text-right max-w-[220px] truncate" style={{ color: "var(--text-secondary)" }}>{row.value}</span>
                 </div>
-                <StatusPill status={payment.status} />
+              ))}
+            </div>
+
+            {payment.status === "succeeded" && payment.mpesa_receipt_number && (
+              <div className="rounded-xl p-4 space-y-1" style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)" }}>
+                <p className="text-[10px] font-mono uppercase tracking-widest" style={{ color: "#10B981" }}>M-Pesa Receipt</p>
+                <p className="text-lg font-mono font-semibold" style={{ color: "#34D399" }}>{payment.mpesa_receipt_number}</p>
               </div>
+            )}
 
-              {/* Details grid */}
-              <div className="border border-[#E5E2DA] rounded-lg overflow-hidden">
-                {[
-                  { label: "Phone", value: formatPhone(payment.phone_number) },
-                  { label: "Reference", value: payment.account_reference },
-                  { label: "Description", value: payment.transaction_desc },
-                  {
-                    label: "Date",
-                    value: formatDate(payment.created_at),
-                  },
-                  payment.checkout_request_id
-                    ? { label: "Checkout ID", value: payment.checkout_request_id }
-                    : null,
-                ]
-                  .filter(Boolean)
-                  .map((row) => (
-                    <div
-                      key={row!.label}
-                      className="flex justify-between items-center px-4 py-3 border-b border-[#E5E2DA] last:border-b-0 bg-white"
-                    >
-                      <span className="font-mono text-[11px] text-[#8B8578]">
-                        {row!.label}
-                      </span>
-                      <span className="font-mono text-[12px] text-[#0E1116] text-right max-w-[220px] truncate">
-                        {row!.value}
-                      </span>
-                    </div>
-                  ))}
+            {(payment.status === "failed" || payment.status === "cancelled") && (
+              <div className="rounded-xl p-4 space-y-1" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
+                <p className="text-[10px] font-mono uppercase tracking-widest" style={{ color: "#EF4444" }}>Failure reason</p>
+                <p className="text-sm font-mono" style={{ color: "#F87171" }}>{mpesaResultLabel(payment.result_code)}</p>
+                {payment.result_desc && <p className="text-xs" style={{ color: "var(--text-muted)" }}>{payment.result_desc}</p>}
               </div>
-
-              {/* Receipt (success) */}
-              {payment.status === "succeeded" &&
-                payment.mpesa_receipt_number && (
-                  <div className="bg-[#dcfce7] border border-[#86efac]/40 rounded-lg p-4 space-y-1">
-                    <p className="text-[11px] font-mono text-[#2D6A4F] uppercase tracking-wide">
-                      M-Pesa Receipt
-                    </p>
-                    <p className="font-mono text-lg font-medium text-[#2D6A4F]">
-                      {payment.mpesa_receipt_number}
-                    </p>
-                  </div>
-                )}
-
-              {/* Failure reason */}
-              {(payment.status === "failed" ||
-                payment.status === "cancelled") && (
-                <div className="bg-[#fee2e2] border border-[#fca5a5]/40 rounded-lg p-4 space-y-1">
-                  <p className="text-[11px] font-mono text-[#C9402E] uppercase tracking-wide">
-                    Failure reason
-                  </p>
-                  <p className="font-mono text-[13px] text-[#C9402E]">
-                    {mpesaResultLabel(payment.result_code)}
-                  </p>
-                  {payment.result_desc && (
-                    <p className="text-[11px] text-[#C9402E]/70">
-                      {payment.result_desc}
-                    </p>
-                  )}
-                </div>
-              )}
-            </>
-          )}
-        </div>
+            )}
+          </>
+        )}
       </div>
-    </div>
+    </Modal>
   );
 }
