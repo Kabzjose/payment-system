@@ -5,7 +5,7 @@ import { logger } from '../../../utils/logger';
 export async function handlePaymentIntentFailed(
   event: Stripe.Event
 ): Promise<void> {
-  const stripeIntent = event.data.object;
+  const stripeIntent = event.data.object as Stripe.PaymentIntent;
   const localId = stripeIntent.metadata?.localPaymentIntentId;
 
   if (!localId) {
