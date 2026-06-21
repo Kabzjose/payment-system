@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../lib/auth";
-import { api,type AdminPayment, ApiError } from "../../lib/api";
+import { api, type AdminPayment, ApiError } from "../../lib/api";
 import { formatStripeAmount, formatMpesaAmount, timeAgo } from "../../lib/format";
 import { StatusPill } from "../Statuspill";
 
@@ -36,27 +36,31 @@ export function PaymentsTable() {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-[#E5E2DA] overflow-hidden">
-      {/* Table header */}
-      <div className="px-5 py-4 border-b border-[#E5E2DA] flex items-center justify-between gap-3 flex-wrap">
-        <h2 className="font-mono text-[11px] uppercase tracking-widest text-[#8B8578]">
-          All Payments
-          <span className="ml-2 text-[#0E1116]">{total}</span>
+    <div
+      className="rounded-xl overflow-hidden"
+      style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}
+    >
+      {/* Header */}
+      <div
+        className="px-5 py-4 flex items-center justify-between gap-3 flex-wrap"
+        style={{ borderBottom: "1px solid var(--border)" }}
+      >
+        <h2 className="font-mono text-[11px] font-semibold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+          All Payments{" "}
+          <span className="font-bold" style={{ color: "var(--text-primary)" }}>{total}</span>
         </h2>
         <div className="flex items-center gap-2">
-          {/* Search */}
           <input
             type="text"
             placeholder="Search email..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="px-3 py-1.5 rounded-md border border-[#E5E2DA] text-[12px] font-mono focus:outline-none focus:border-[#0E1116] w-40"
+            className="input-base px-3 py-1.5 text-[12px] font-mono w-40"
           />
-          {/* Method filter */}
           <select
             value={method}
             onChange={(e) => { setMethod(e.target.value); setPage(1); }}
-            className="px-3 py-1.5 rounded-md border border-[#E5E2DA] text-[12px] font-mono focus:outline-none focus:border-[#0E1116]"
+            className="input-base px-3 py-1.5 text-[12px] font-mono"
           >
             <option value="">All methods</option>
             <option value="card">Card</option>
@@ -65,49 +69,57 @@ export function PaymentsTable() {
         </div>
       </div>
 
-      {/* Table */}
       {loading ? (
-        <p className="text-[13px] text-[#8B8578] px-5 py-8">Loading...</p>
+        <p className="text-[13px] px-5 py-8" style={{ color: "var(--text-muted)" }}>Loading...</p>
       ) : error ? (
-        <p className="text-[13px] text-[#C9402E] px-5 py-8">{error}</p>
+        <p className="text-[13px] px-5 py-8" style={{ color: "#EF4444" }}>{error}</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-[12px]">
             <thead>
-              <tr className="border-b border-[#E5E2DA] bg-[#F7F5F0]">
+              <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-elevated)" }}>
                 {["User", "Amount", "Method", "Status", "Date"].map((h) => (
                   <th
                     key={h}
-                    className="px-4 py-2.5 text-left font-mono text-[10px] uppercase tracking-widest text-[#8B8578]"
+                    className="px-4 py-2.5 text-left font-mono text-[10px] font-semibold uppercase tracking-widest"
+                    style={{ color: "var(--text-label)" }}
                   >
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#F0EEE9]">
+            <tbody>
               {payments.map((p) => (
-                <tr key={`${p.method}-${p.id}`} className="hover:bg-[#FAFAF8]">
+                <tr
+                  key={`${p.method}-${p.id}`}
+                  style={{ borderBottom: "1px solid var(--border-subtle)" }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-row-hover)")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                >
                   <td className="px-4 py-3">
-                    <div className="font-medium text-[#0E1116]">{p.user_name}</div>
-                    <div className="text-[#8B8578] text-[11px] font-mono">{p.user_email}</div>
+                    <div className="font-semibold" style={{ color: "var(--text-primary)" }}>{p.user_name}</div>
+                    <div className="text-[11px] font-mono font-medium" style={{ color: "var(--text-muted)" }}>{p.user_email}</div>
                   </td>
-                  <td className="px-4 py-3 font-serif tabular-nums text-[#0E1116]">
+                  <td className="px-4 py-3 font-semibold tabular-nums" style={{ color: "var(--text-primary)" }}>
                     {formatAmount(p)}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`font-mono text-[10px] font-medium px-1.5 py-0.5 rounded ${
-                      p.method === "card"
-                        ? "bg-[#eff6ff] text-[#3b82f6] border border-[#93c5fd]/40"
-                        : "bg-[#fffbeb] text-[#9C7A1F] border border-[#fcd34d]/40"
-                    }`}>
+                    <span
+                      className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                      style={
+                        p.method === "card"
+                          ? { background: "rgba(99,102,241,0.1)", color: "#818CF8" }
+                          : { background: "rgba(245,158,11,0.1)", color: "#F59E0B" }
+                      }
+                    >
                       {p.method === "card" ? "CARD" : "MPESA"}
                     </span>
                   </td>
                   <td className="px-4 py-3">
                     <StatusPill status={p.status} />
                   </td>
-                  <td className="px-4 py-3 font-mono text-[11px] text-[#8B8578]">
+                  <td className="px-4 py-3 font-mono text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>
                     {timeAgo(p.created_at)}
                   </td>
                 </tr>
@@ -115,7 +127,7 @@ export function PaymentsTable() {
 
               {payments.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-[13px] text-[#8B8578]">
+                  <td colSpan={5} className="px-4 py-10 text-center text-[13px]" style={{ color: "var(--text-muted)" }}>
                     No payments found
                   </td>
                 </tr>
@@ -127,22 +139,25 @@ export function PaymentsTable() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="px-5 py-3 border-t border-[#E5E2DA] flex items-center justify-between">
-          <span className="font-mono text-[11px] text-[#8B8578]">
+        <div
+          className="px-5 py-3 flex items-center justify-between"
+          style={{ borderTop: "1px solid var(--border)" }}
+        >
+          <span className="font-mono text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>
             Page {page} of {totalPages}
           </span>
           <div className="flex gap-2">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="px-3 py-1 rounded border border-[#E5E2DA] text-[12px] disabled:opacity-40 hover:border-[#0E1116] transition-colors"
+              className="btn-ghost px-3 py-1 text-[12px] disabled:opacity-30"
             >
               ← Prev
             </button>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="px-3 py-1 rounded border border-[#E5E2DA] text-[12px] disabled:opacity-40 hover:border-[#0E1116] transition-colors"
+              className="btn-ghost px-3 py-1 text-[12px] disabled:opacity-30"
             >
               Next →
             </button>
