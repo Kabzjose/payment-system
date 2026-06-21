@@ -11,3 +11,6 @@ CREATE TABLE users (
 
 -- Index email for fast lookups during login
 CREATE INDEX idx_users_email ON users(email);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT false;
+
+CREATE INDEX idx_users_is_admin ON users(is_admin) WHERE is_admin = true;
