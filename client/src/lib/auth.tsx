@@ -8,6 +8,12 @@ interface AuthState {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, name: string, password: string) => Promise<void>;
+  updateProfile: (payload: {
+    name?: string;
+    email?: string;
+    currentPassword?: string;
+    newPassword?: string;
+  }) => Promise<void>;
   logout: () => void;
 }
 
@@ -58,6 +64,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     persist(res.token, res.user);
   }
 
+  async function updateProfile(payload: {
+    name?: string;
+    email?: string;
+    currentPassword?: string;
+    newPassword?: string;
+  }) {
+    if (!token) throw new Error("Not authenticated");
+    const res = await api.updateProfile(token, payload);
+    // Refresh the in-memory user so the UI reflects changes immediately
+    setUser(res.user);
+  }
+
   function logout() {
     sessionStorage.removeItem(STORAGE_KEY);
     setToken(null);
@@ -73,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         login,
         register,
+        updateProfile,
         logout,
       }}
     >

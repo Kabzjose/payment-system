@@ -63,10 +63,42 @@ export const authService = {
 
   async me(userId: string) {
     const user = await userRepository.findById(userId);
-    if (!user) {
-      throw new AppError('User not found', 404);
-    }
+    if (!user) throw new AppError('User not found', 404);
     const { password_hash: _, ...safeUser } = user;
+    return { user: safeUser };
+  },
+
+  async updateProfile(
+    userId: string,
+    data: { name?: string; email?: string; currentPassword?: string; newPassword?: string }
+  ) {
+    const user = await userRepository.findById(userId);
+    if (!user) throw new AppError('User not found', 404);
+
+    const updates: Partial<{ name: string; email: string; password_hash: string }> = {};
+
+    if (data.name !== undefined) {
+      if (data.name.trim().length < 2) throw new AppError('Name must be at least 2 characters', 400);
+      updates.name = data.name.trim();
+    }
+
+    if (data.email !== undefined && data.email !== user.email) {
+      const existing = await userRepository.findByEmail(data.email);
+      if (existing) throw new AppError('Email already in use', 409);
+      updates.email = data.email;
+    }
+
+    if (data.newPassword) {
+      if (!data.currentPassword) throw new AppError('Current password is required to set a new one', 400);
+      const valid = await bcrypt.compare(data.currentPassword, user.password_hash);
+      if (!valid) throw new AppError('Current password is incorrect', 401);
+      if (data.newPassword.length < 8) throw new AppError('New password must be at least 8 characters', 400);
+      updates.password_hash = await bcrypt.hash(data.newPassword, SALT_ROUNDS);
+    }
+
+    const updated = await userRepository.updateById(userId, updates);
+    if (!updated) throw new AppError('Update failed', 500);
+    const { password_hash: _, ...safeUser } = updated;
     return { user: safeUser };
   },
 

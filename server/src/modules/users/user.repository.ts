@@ -33,4 +33,25 @@ export const userRepository = {
     return rows[0];
   },
 
+  async updateById(
+    id: string,
+    data: Partial<{ name: string; email: string; password_hash: string }>
+  ): Promise<User | null> {
+    const fields = Object.keys(data) as (keyof typeof data)[];
+    if (fields.length === 0) return userRepository.findById(id);
+
+    // Dynamically build: SET name = $2, email = $3, updated_at = NOW()
+    const setClauses = [
+      ...fields.map((f, i) => `${f} = $${i + 2}`),
+      'updated_at = NOW()',
+    ].join(', ');
+    const values = fields.map((f) => data[f]);
+
+    const { rows } = await db.query<User>(
+      `UPDATE users SET ${setClauses} WHERE id = $1 RETURNING *`,
+      [id, ...values]
+    );
+    return rows[0] ?? null;
+  },
+
 };

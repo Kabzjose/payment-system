@@ -237,6 +237,22 @@ export const api = {
     return request<{ user: User }>("/auth/me", { token });
   },
 
+  updateProfile(
+    token: string,
+    payload: {
+      name?: string;
+      email?: string;
+      currentPassword?: string;
+      newPassword?: string;
+    }
+  ) {
+    return request<{ user: User }>("/auth/profile", {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+      token,
+    });
+  },
+
   // ── Stripe payments ───────────────────────────────────────────────────────
   createPaymentIntent(
     token: string,

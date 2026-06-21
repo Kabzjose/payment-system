@@ -1,5 +1,6 @@
 import { type ReactNode, useState } from "react";
 import { useAuth } from "../../lib/auth";
+import { EditProfileModal } from "../modals/EditProfileModal";
 
 export type AdminTab = "overview" | "payments" | "users";
 
@@ -49,6 +50,7 @@ interface AdminSidebarProps {
 export function AdminSidebar({ activeTab, onNavigate, mobileOpen, onMobileClose }: AdminSidebarProps) {
   const { user, logout } = useAuth();
   const [hovered, setHovered] = useState<AdminTab | null>(null);
+  const [showProfile, setShowProfile] = useState(false);
 
   function handleNav(tab: AdminTab) {
     onNavigate(tab);
@@ -138,6 +140,19 @@ export function AdminSidebar({ activeTab, onNavigate, mobileOpen, onMobileClose 
             <p className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{user?.name}</p>
             <p className="text-[10px] truncate font-mono" style={{ color: "var(--text-muted)" }}>{user?.email}</p>
           </div>
+          <button
+            onClick={() => setShowProfile(true)}
+            className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 transition-colors"
+            style={{ color: "var(--text-label)" }}
+            onMouseEnter={e => (e.currentTarget.style.color = "var(--accent)")}
+            onMouseLeave={e => (e.currentTarget.style.color = "var(--text-label)")}
+            title="Edit profile"
+            aria-label="Edit profile"
+          >
+            <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L16.732 3.732z" />
+            </svg>
+          </button>
         </div>
 
         <button
@@ -178,6 +193,9 @@ export function AdminSidebar({ activeTab, onNavigate, mobileOpen, onMobileClose 
       >
         <SidebarContent />
       </aside>
+
+      {/* Edit profile modal */}
+      {showProfile && <EditProfileModal onClose={() => setShowProfile(false)} />}
     </>
   );
 }
