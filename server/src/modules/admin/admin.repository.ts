@@ -102,14 +102,14 @@ export const adminRepository = {
           u.name      AS user_name,
           pi.amount,
           pi.currency,
-          pi.status,
+          pi.status::TEXT,
           'card'      AS method,
           pi.created_at,
           pi.stripe_payment_intent_id AS external_id
         FROM payment_intents pi
         JOIN users u ON u.id = pi.user_id
         WHERE 1=1 ${searchFilter}
-        ${params.status ? `AND pi.status = '${params.status}'` : ''}
+        ${params.status ? `AND pi.status::TEXT = '${params.status}'` : ''}
         ${params.method && params.method !== 'mpesa' ? '' : ''}
 
         UNION ALL
@@ -122,14 +122,14 @@ export const adminRepository = {
           u.name        AS user_name,
           mp.amount * 100 AS amount,
           'kes'         AS currency,
-          mp.status,
+          mp.status::TEXT,
           'mpesa'       AS method,
           mp.created_at,
           mp.mpesa_receipt_number AS external_id
         FROM mpesa_payments mp
         JOIN users u ON u.id = mp.user_id
         WHERE 1=1 ${searchFilter}
-        ${params.status ? `AND mp.status = '${params.status}'` : ''}
+        ${params.status ? `AND mp.status::TEXT = '${params.status}'` : ''}
       )
       SELECT
         *,

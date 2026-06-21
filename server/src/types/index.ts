@@ -16,6 +16,7 @@ export interface User {
   email: string;
   name: string;
   password_hash: string;
+  is_admin: boolean;
   created_at: Date;
   updated_at: Date;
 }

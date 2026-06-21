@@ -1,11 +1,12 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./lib/auth";
+import { ThemeProvider } from "./lib/theme";
 import { AuthScreen } from "./components/Authscreen";
 import { Dashboard } from "./components/Dashboard";
 import { AdminPage } from "./components/pages/AdminPage";
 
 function AppContent() {
-  const { user, loading } = useAuth();
+  const { user, isAdmin, loading } = useAuth();
 
   if (loading) {
     return (
@@ -19,10 +20,24 @@ function AppContent() {
 
   return (
     <Routes>
-      <Route path="/admin" element={<AdminPage />} />
+      {/* Admin route — redirect non-admins to home */}
+      <Route
+        path="/admin"
+        element={
+          !user ? <AuthScreen /> :
+          isAdmin ? <AdminPage /> :
+          <Navigate to="/" replace />
+        }
+      />
+
+      {/* User route — redirect admins to admin dashboard */}
       <Route
         path="/"
-        element={user ? <Dashboard /> : <AuthScreen />}
+        element={
+          !user ? <AuthScreen /> :
+          isAdmin ? <Navigate to="/admin" replace /> :
+          <Dashboard />
+        }
       />
     </Routes>
   );
@@ -30,8 +45,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
