@@ -4,7 +4,7 @@ import { env } from '../../config/env';
 import { userRepository } from '../users/user.repository';
 import { AppError } from '../../utils/errors';
 
-const SALT_ROUNDS = 12; 
+const SALT_ROUNDS = 12;
 const TOKEN_EXPIRY = '7d';
 
 export interface TokenPayload {
@@ -43,7 +43,7 @@ export const authService = {
     // 1. Find user
     const user = await userRepository.findByEmail(data.email);
 
-   
+
     if (!user) {
       throw new AppError('Invalid credentials', 401);
     }
