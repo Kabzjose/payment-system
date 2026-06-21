@@ -8,6 +8,7 @@ import paymentRoutes from './modules/payments/payment.routes';
 import webhookRoutes from './modules/webhooks/webhook.routes';
 import mpesaRoutes from './modules/mpesa/mpesa.routes';
 import subscriptionRoutes from './modules/subscriptions/subscription.routes';
+import adminRoutes from './modules/admin/admin.routes';
 
 // Create Express app
 
@@ -43,6 +44,7 @@ app.get('/health', (req, res) => {
 
 // API routes
 app.use('/auth', authRoutes);
+app.use('/admin', adminRoutes);
 
 app.use('/payments/mpesa', mpesaRoutes);
 app.use('/payments', paymentRoutes);
