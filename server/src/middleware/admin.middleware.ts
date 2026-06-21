@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { db } from '../config/database';
+import { db } from '../config/db';
 import { AppError } from '../utils/errors';
 
 export async function requireAdmin(
