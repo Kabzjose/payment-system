@@ -79,6 +79,69 @@ export interface Plan {
   active: boolean;
 }
 
+// ─── Admin types ──────────────────────────────────────────────────────────────
+
+export interface AdminPayment {
+  id: string;
+  user_id: string;
+  user_email: string;
+  user_name: string;
+  amount: number;
+  currency: string;
+  status: string;
+  method: "card" | "mpesa";
+  created_at: string;
+  external_id: string | null;
+}
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  name: string;
+  is_admin: boolean;
+  created_at: string;
+  stripe_payment_count: number;
+  stripe_total_cents: number;
+  mpesa_payment_count: number;
+  mpesa_total_kes: number;
+  subscription_status: string | null;
+  plan_name: string | null;
+}
+
+export interface AdminUserDetail {
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    is_admin: boolean;
+    created_at: string;
+  };
+  stripePayments: Array<{
+    id: string;
+    amount: number;
+    currency: string;
+    status: string;
+    created_at: string;
+    stripe_payment_intent_id: string | null;
+  }>;
+  mpesaPayments: Array<{
+    id: string;
+    amount: number;
+    phone_number: string;
+    status: string;
+    mpesa_receipt_number: string | null;
+    created_at: string;
+  }>;
+  subscriptions: Array<{
+    id: string;
+    status: string;
+    plan_name: string;
+    plan_amount: number;
+    current_period_end: string | null;
+    created_at: string;
+  }>;
+}
+
 export interface Subscription {
   id: string;
   user_id: string;
@@ -228,6 +291,72 @@ export const api = {
   getMpesaPayment(token: string, id: string) {
     return request<MpesaPayment>(`/payments/mpesa/${id}`, { token });
   },
+
+  // ── Admin ─────────────────────────────────────────────────────────────────
+
+getAdminStats(token: string) {
+  return request<{
+    totalRevenueCents: number;
+    stripeRevenueCents: number;
+    mpesaRevenueCents: number;
+    totalUsers: number;
+    adminUsers: number;
+    activeSubscriptions: number;
+    pastDueSubscriptions: number;
+    failedPayments: number;
+    planBreakdown: Array<{
+      name: string;
+      amount: number;
+      currency: string;
+      subscriber_count: number;
+    }>;
+  }>("/admin/stats", { token });
+},
+
+getAdminPayments(
+  token: string,
+  params?: {
+    page?: number;
+    search?: string;
+    status?: string;
+    method?: string;
+  }
+) {
+  const query = new URLSearchParams();
+  if (params?.page) query.set("page", String(params.page));
+  if (params?.search) query.set("search", params.search);
+  if (params?.status) query.set("status", params.status);
+  if (params?.method) query.set("method", params.method);
+  const qs = query.toString();
+  return request<{
+    payments: AdminPayment[];
+    total: number;
+    page: number;
+    limit: number;
+  }>(`/admin/payments${qs ? `?${qs}` : ""}`, { token });
+},
+
+getAdminUsers(
+  token: string,
+  params?: { page?: number; search?: string }
+) {
+  const query = new URLSearchParams();
+  if (params?.page) query.set("page", String(params.page));
+  if (params?.search) query.set("search", params.search);
+  const qs = query.toString();
+  return request<{
+    users: AdminUser[];
+    total: number;
+    page: number;
+    limit: number;
+  }>(`/admin/users${qs ? `?${qs}` : ""}`, { token });
+},
+
+getAdminUserDetail(token: string, userId: string) {
+  return request<AdminUserDetail>(`/admin/users/${userId}`, { token });
+},
+
+
 
   // ── Subscriptions ─────────────────────────────────────────────────────────
   getPlans(token: string) {
