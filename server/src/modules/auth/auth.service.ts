@@ -61,6 +61,15 @@ export const authService = {
     return { user: safeUser, token };
   },
 
+  async me(userId: string) {
+    const user = await userRepository.findById(userId);
+    if (!user) {
+      throw new AppError('User not found', 404);
+    }
+    const { password_hash: _, ...safeUser } = user;
+    return { user: safeUser };
+  },
+
 };
 
 function generateToken(payload: TokenPayload): string {

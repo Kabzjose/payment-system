@@ -22,8 +22,13 @@ export const authController = {
   },
 
   // Protected route — requireAuth already verified the token
-  async me(req: Request, res: Response) {
-    res.json({ success: true, data: { user: req.user } });
+  async me(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await authService.me(req.user!.userId);
+      res.json({ success: true, data: result });
+    } catch (err) {
+      next(err);
+    }
   },
 
 };
