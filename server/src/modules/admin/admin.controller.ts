@@ -49,4 +49,56 @@ export const adminController = {
     }
   },
 
+  async adminRefund(req: Request, res: Response, next: NextFunction) {
+    try {
+      const transaction = await adminService.adminRefund({
+        adminUserId: req.user!.userId,
+        paymentIntentId: req.params.id as string,
+        amount: req.body.amount,
+        reason: req.body.reason,
+      });
+      res.json({ success: true, data: transaction });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async adminCancelSubscription(req: Request, res: Response, next: NextFunction) {
+    try {
+      const sub = await adminService.adminCancelSubscription({
+        adminUserId: req.user!.userId,
+        subscriptionId: req.params.id as string,
+        immediately: req.body.immediately ?? true,
+      });
+      res.json({ success: true, data: sub });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async suspendUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await adminService.suspendUser({
+        adminUserId: req.user!.userId,
+        targetUserId: req.params.id as string,
+        reason: req.body.reason ?? 'Suspended by admin',
+      });
+      res.json({ success: true, data: result });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async unsuspendUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await adminService.unsuspendUser({
+        adminUserId: req.user!.userId,
+        targetUserId: req.params.id as string,
+      });
+      res.json({ success: true, data: result });
+    } catch (err) {
+      next(err);
+    }
+  },
+
 };

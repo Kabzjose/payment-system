@@ -17,6 +17,8 @@ export interface User {
   name: string;
   password_hash: string;
   is_admin: boolean;
+  suspended_at: Date | null;
+  suspension_reason: string | null;
   created_at: Date;
   updated_at: Date;
 }

@@ -48,6 +48,15 @@ export const authService = {
       throw new AppError('Invalid credentials', 401);
     }
 
+    // Check suspension before password verification
+    // Give a specific message so suspended users know why they can't login
+    if (user.suspended_at) {
+      throw new AppError(
+        'Your account has been suspended. Please contact support.',
+        403
+      );
+    }
+
     // 2. Verify password
     const valid = await bcrypt.compare(data.password, user.password_hash);
     if (!valid) {

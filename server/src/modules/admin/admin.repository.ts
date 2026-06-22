@@ -226,7 +226,7 @@ export const adminRepository = {
   async getUserDetail(userId: string) {
     // User info
     const { rows: userRows } = await db.query(
-      `SELECT id, email, name, is_admin, created_at FROM users WHERE id = $1`,
+      `SELECT id, email, name, is_admin, suspended_at, suspension_reason, created_at FROM users WHERE id = $1`,
       [userId]
     );
     if (!userRows[0]) return null;
@@ -269,6 +269,49 @@ export const adminRepository = {
       mpesaPayments,
       subscriptions,
     };
+  },
+
+  // ── Admin refund ──────────────────────────────────────────────────────────
+  async findPaymentById(paymentId: string) {
+    const { rows } = await db.query(
+      `SELECT pi.*, u.email AS user_email
+       FROM payment_intents pi
+       JOIN users u ON u.id = pi.user_id
+       WHERE pi.id = $1`,
+      [paymentId]
+    );
+    return rows[0] ?? null;
+  },
+
+  // ── Suspend / unsuspend user ──────────────────────────────────────────────
+  async suspendUser(
+    userId: string,
+    reason: string
+  ): Promise<void> {
+    await db.query(
+      `UPDATE users
+       SET suspended_at = NOW(), suspension_reason = $2
+       WHERE id = $1`,
+      [userId, reason]
+    );
+  },
+
+  async unsuspendUser(userId: string): Promise<void> {
+    await db.query(
+      `UPDATE users
+       SET suspended_at = NULL, suspension_reason = NULL
+       WHERE id = $1`,
+      [userId]
+    );
+  },
+
+  async getUserSuspensionStatus(userId: string) {
+    const { rows } = await db.query(
+      `SELECT id, email, name, suspended_at, suspension_reason
+       FROM users WHERE id = $1`,
+      [userId]
+    );
+    return rows[0] ?? null;
   },
 
 };
