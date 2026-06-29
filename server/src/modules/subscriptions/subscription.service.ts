@@ -6,7 +6,9 @@ import { subscriptionRepository } from './subscription.repository';
 import { customerRepository } from '../customers/customer.repository';
 import { userRepository } from '../users/user.repository';
 import { AppError } from '../../utils/errors';
+import { emailService } from '../../utils/email.service';
 import { logger } from '../../utils/logger';
+
 
 // Add helper at top of file
 function toDate(unixSeconds: number | null | undefined): Date | undefined {
@@ -141,6 +143,19 @@ const subscription = await subscriptionRepository.create({
   trial_end: toDate(stripeSubscription.trial_end ?? undefined),
 });
 
+//send user email when subscription is created
+if (user) {
+  await emailService.sendSubscriptionStarted(user.email, {
+    name: user.name,
+    planName: plan.name,
+    amount: plan.amount,
+    currency: plan.currency,
+    interval: plan.interval,
+    nextBillingDate: subscription.current_period_end?.toISOString()
+      ?? new Date().toISOString(),
+  });
+}
+
     // 7. Extract clientSecret if payment needs confirmation
     // (happens on first invoice for subscriptions)
     const invoice = stripeSubscription.latest_invoice as Stripe.Invoice;
@@ -188,6 +203,17 @@ const subscription = await subscriptionRepository.create({
       { subscriptionId: data.subscriptionId, immediately: data.immediately },
       'Subscription canceled'
     );
+
+    //send user email when subscription is canceled
+    const user = await userRepository.findById(data.userId);
+    if (user) {
+    await emailService.sendSubscriptionCanceled(user.email, {
+    name: user.name,
+    planName: subscription.plan.name,
+    accessUntil: subscription.current_period_end?.toISOString() ?? null,
+    immediately: data.immediately ?? false,
+  });
+}
 
     return subscriptionRepository.findById(data.subscriptionId);
   },

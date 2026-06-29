@@ -161,6 +161,8 @@ export const mpesaService = {
 
   logger.info({ found: existing.id, currentStatus: existing.status }, 'Found matching payment');
 
+    let receiptNumber: string | null = null;
+    
     // ResultCode 0 = success, anything else = failure
     if (ResultCode === 0) {
       // Extract the receipt number from the metadata items array
@@ -189,6 +191,8 @@ export const mpesaService = {
 
       logger.warn({ CheckoutRequestID, ResultCode, ResultDesc }, 'M-Pesa payment failed');
     }
+
+    // Send email notification to user if payment succeeded
 
     const payment = await mpesaRepository.findByCheckoutRequestId(CheckoutRequestID);
     if (payment && receiptNumber) {

@@ -5,6 +5,7 @@ import { paymentRepository } from '../payments/payment.repository';
 import { subscriptionRepository } from '../subscriptions/subscription.repository';
 import { AppError } from '../../utils/errors';
 import { logger } from '../../utils/logger';
+import { emailService } from '../../utils/email.service';
 
 export const adminService = {
 
@@ -181,6 +182,15 @@ export const adminService = {
       },
       'User suspended'
     );
+   
+    //send user email after suspension
+    const user = await adminRepository.getUserSuspensionStatus(data.targetUserId);
+    if (user) {
+    await emailService.sendAccountSuspended(user.email, {
+    name: user.name,
+    reason: data.reason,
+  });
+}
 
     return adminRepository.getUserSuspensionStatus(data.targetUserId);
   },

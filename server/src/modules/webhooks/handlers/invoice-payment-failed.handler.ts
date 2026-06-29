@@ -4,6 +4,7 @@ import { logger } from '../../../utils/logger';
 import { emailService } from '../../../utils/email.service';
 import { userRepository } from '../../users/user.repository';
 
+
 export async function handleInvoicePaymentFailed(
   event: Stripe.Event
 ): Promise<void> {
@@ -24,15 +25,23 @@ export async function handleInvoicePaymentFailed(
     { stripeSubId, invoiceId: invoice.id },
     'Invoice payment failed — subscription past_due'
   );
+//send user email when subscription payment fails
+  const subscription = await subscriptionRepository
+  .findByStripeSubscriptionId(stripeSubId);
 
-  // send user email when payment fails
-  const user = await userRepository.findById(stripeIntent.metadata.userId);
-if (user) {
-  await emailService.sendPaymentFailed(user.email, {
-    name: user.name,
-    amount: stripeIntent.amount,
-    currency: stripeIntent.currency,
-    failureReason: failureMessage,
-  });
+if (subscription) {
+  const user = await userRepository.findById(subscription.user_id);
+  const subWithPlan = await subscriptionRepository.findById(subscription.id);
+
+  if (user && subWithPlan) {
+    await emailService.sendSubscriptionPaymentFailed(user.email, {
+      name: user.name,
+      planName: subWithPlan.plan.name,
+      amount: subWithPlan.plan.amount,
+      currency: subWithPlan.plan.currency,
+    });
+  }
 }
+
+  
 }

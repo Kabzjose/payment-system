@@ -1,6 +1,8 @@
 import Stripe from 'stripe';
 import { db } from '../../../config/db';
 import { logger } from '../../../utils/logger';
+import { emailService } from '../../../utils/email.service';
+import { userRepository } from '../../users/user.repository';
 
 export async function handlePaymentIntentFailed(
   event: Stripe.Event
@@ -50,4 +52,14 @@ export async function handlePaymentIntentFailed(
   } finally {
     client.release();
   }
+  // send user email when payment fails
+  const user = await userRepository.findById(stripeIntent.metadata.userId);
+if (user) {
+  await emailService.sendPaymentFailed(user.email, {
+    name: user.name,
+    amount: stripeIntent.amount,
+    currency: stripeIntent.currency,
+    failureReason: failureMessage,
+  });
+}
 }
