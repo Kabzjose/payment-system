@@ -9,6 +9,8 @@ import {
 import { mpesaRepository } from './mpesa.repository';
 import { AppError } from '../../utils/errors';
 import { logger } from '../../utils/logger';
+import { emailService } from '../../utils/email.service';
+import { userRepository } from '../users/user.repository';
 
 // ── Step 1: OAuth token ──────────────────────────────────────────────────
 // Daraja requires a bearer token on every request. Tokens expire after 1 hour.
@@ -187,6 +189,20 @@ export const mpesaService = {
 
       logger.warn({ CheckoutRequestID, ResultCode, ResultDesc }, 'M-Pesa payment failed');
     }
+
+    const payment = await mpesaRepository.findByCheckoutRequestId(CheckoutRequestID);
+    if (payment && receiptNumber) {
+    const user = await userRepository.findById(payment.user_id);
+    if (user) {
+    await emailService.sendMpesaPaymentSucceeded(user.email, {
+      name: user.name,
+      amount: payment.amount,
+      phoneNumber: payment.phone_number,
+      receiptNumber,
+      createdAt: new Date().toISOString(),
+    });
+  }
+}
   },
 
   async getPayment(id: string, userId: string) {
