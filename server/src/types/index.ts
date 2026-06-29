@@ -142,4 +142,4 @@ export interface MpesaPayment {
   created_at: Date;
   updated_at: Date;
 }
-declare module 'nodemailer';
+
