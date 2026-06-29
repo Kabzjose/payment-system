@@ -71,7 +71,7 @@ function CardPaymentForm({ onSuccess }: { onSuccess: () => void }) {
       <div>
         <label htmlFor="card-amount" className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: "var(--text-muted)" }}>Amount (USD)</label>
         <div className="relative">
-          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-base font-semibold" style={{ color: "var(--text-muted)" }}>$</span>
+          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-base font-semibold" style={{ color: "var(--text-muted)" }}></span>
           <input id="card-amount" type="text" value={amount} onChange={(e) => setAmount(e.target.value)} className="input-base pl-8 text-lg font-mono" />
         </div>
       </div>
