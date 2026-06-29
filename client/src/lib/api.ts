@@ -115,6 +115,8 @@ export interface AdminUserDetail {
     email: string;
     name: string;
     is_admin: boolean;
+    suspended_at: string | null;
+    suspension_reason: string | null;
     created_at: string;
   };
   stripePayments: Array<{
@@ -139,6 +141,7 @@ export interface AdminUserDetail {
     plan_name: string;
     plan_amount: number;
     current_period_end: string | null;
+    cancel_at_period_end: boolean;
     created_at: string;
   }>;
 }
@@ -373,7 +376,58 @@ getAdminUserDetail(token: string, userId: string) {
   return request<AdminUserDetail>(`/admin/users/${userId}`, { token });
 },
 
+// ── Admin actions ─────────────────────────────────────────────────────────────────
+adminRefund(
+  token: string,
+  paymentId: string,
+  payload?: { amount?: number; reason?: string }
+) {
+  return request<{ id: string; amount: number; status: string }>(
+    `/admin/payments/${paymentId}/refund`,
+    { method: "POST", body: JSON.stringify(payload ?? {}), token }
+  );
+},
 
+adminCancelSubscription(
+  token: string,
+  subscriptionId: string,
+  payload?: { immediately?: boolean }
+) {
+  return request<{ id: string; status: string }>(
+    `/admin/subscriptions/${subscriptionId}/cancel`,
+    { method: "POST", body: JSON.stringify(payload ?? {}), token }
+  );
+},
+
+adminSuspendUser(
+  token: string,
+  userId: string,
+  payload: { reason: string }
+) {
+  return request<{
+    id: string;
+    email: string;
+    suspended_at: string;
+    suspension_reason: string;
+  }>(`/admin/users/${userId}/suspend`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+    token,
+  });
+},
+
+adminUnsuspendUser(token: string, userId: string) {
+  return request<{
+    id: string;
+    email: string;
+    suspended_at: null;
+    suspension_reason: null;
+  }>(`/admin/users/${userId}/unsuspend`, {
+    method: "POST",
+    body: JSON.stringify({}),
+    token,
+  });
+},
 
   // ── Subscriptions ─────────────────────────────────────────────────────────
   getPlans(token: string) {
