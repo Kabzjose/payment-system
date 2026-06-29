@@ -1,27 +1,22 @@
-import { resend } from '../config/email';
+import { transporter } from '../config/email';
 import { emailTemplates } from './email.template';
 import { env } from '../config/env';
 import { logger } from './logger';
 
-const FROM = env.RESEND_FROM_EMAIL;
+const FROM = env.EMAIL_FROM;
 
 // Wrapper that logs on success/failure but never throws
 // Email sending should never crash your main flow
 async function send(to: string, template: { subject: string; html: string }) {
   try {
-    const { data, error } = await resend.emails.send({
+    const info = await transporter.sendMail({
       from: FROM,
       to,
       subject: template.subject,
       html: template.html,
     });
 
-    if (error) {
-      logger.warn({ to, subject: template.subject, error }, 'Email send failed');
-      return;
-    }
-
-    logger.info({ to, subject: template.subject, id: data?.id }, 'Email sent');
+    logger.info({ to, subject: template.subject, messageId: info.messageId }, 'Email sent');
   } catch (err) {
     // Never let email failure crash the payment flow
     logger.error({ to, subject: template.subject, err }, 'Email service error');

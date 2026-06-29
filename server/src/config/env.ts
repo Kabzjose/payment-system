@@ -32,7 +32,16 @@ export const env = {
   MPESA_CALLBACK_URL: required('MPESA_CALLBACK_URL'),
   MPESA_ENVIRONMENT: (process.env.MPESA_ENVIRONMENT ?? 'sandbox') as 'sandbox' | 'production',
   
-  RESEND_API_KEY: required('RESEND_API_KEY'),
-  RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev',
-  
+  // Nodemailer / Gmail SMTP
+  SMTP_HOST: process.env.SMTP_HOST ?? 'smtp.gmail.com',
+  SMTP_PORT: parseInt(process.env.SMTP_PORT ?? '587', 10),
+  // secure: true → port 465 (SMTPS); false → port 587 (STARTTLS)
+  // Defaults to true only when port is 465; override with SMTP_SECURE=true|false
+  SMTP_SECURE: process.env.SMTP_SECURE !== undefined
+    ? process.env.SMTP_SECURE === 'true'
+    : (parseInt(process.env.SMTP_PORT ?? '587', 10) === 465),
+  SMTP_USER: required('SMTP_USER'),
+  SMTP_PASS: required('SMTP_PASS'),
+  EMAIL_FROM: process.env.EMAIL_FROM ?? process.env.SMTP_USER ?? '',
+
 } as const;
