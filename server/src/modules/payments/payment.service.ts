@@ -5,6 +5,8 @@ import { customerRepository } from '../customers/customer.repository';
 import { userRepository } from '../users/user.repository';
 import { AppError } from '../../utils/errors';
 import { logger } from '../../utils/logger';
+import { emailService } from '../../utils/email.service';
+
 
 export const paymentService = {
 
@@ -225,6 +227,20 @@ export const paymentService = {
       },
       'Refund created'
     );
+
+    //send user email after refund
+    const user = await userRepository.findById(data.userId);
+    if (user) {
+     await emailService.sendRefundIssued(user.email, {
+      name: user.name,
+      amount: refundAmount,
+      currency: intent.currency,
+      originalAmount: intent.amount,
+      refundId: refund.id,
+      createdAt: new Date().toISOString(),
+    });
+}
+    ;
 
     return transaction;
   },

@@ -2,6 +2,8 @@ import Stripe from 'stripe';
 import { db } from '../../../config/db';
 import { paymentRepository } from '../../payments/payment.repository';
 import { logger } from '../../../utils/logger';
+import { emailService } from '../../../utils/email.service';
+import { userRepository } from '../../users/user.repository';
 
 export async function handlePaymentIntentSucceeded(
   event: Stripe.Event
@@ -56,4 +58,15 @@ export async function handlePaymentIntentSucceeded(
   } finally {
     client.release(); // always return connection to pool
   }
+ //send email notification to user after payment is successful
+  const user = await userRepository.findById(stripeIntent.metadata.userId);
+  if (user) {
+    await emailService.sendPaymentSucceeded(user.email, {
+    name: user.name,
+    amount: stripeIntent.amount,
+    currency: stripeIntent.currency,
+    paymentId: localId,
+    createdAt: new Date().toISOString(),
+  });
+}
 }

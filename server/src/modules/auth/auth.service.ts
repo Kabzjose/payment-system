@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken';
 import { env } from '../../config/env';
 import { userRepository } from '../users/user.repository';
 import { AppError } from '../../utils/errors';
+import { emailService } from '../../utils/email.service';
+
 
 const SALT_ROUNDS = 12;
 const TOKEN_EXPIRY = '7d';
@@ -37,6 +39,9 @@ export const authService = {
     // 5. Never return the password hash
     const { password_hash: _, ...safeUser } = user;
     return { user: safeUser, token };
+    
+    //send welcome email
+    await emailService.sendWelcome(user.email, { name: user.name });
   },
 
   async login(data: { email: string; password: string }) {

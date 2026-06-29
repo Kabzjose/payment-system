@@ -1,6 +1,8 @@
 import Stripe from 'stripe';
 import { subscriptionRepository } from '../../subscriptions/subscription.repository';
 import { logger } from '../../../utils/logger';
+import { emailService } from '../../../utils/email.service';
+import { userRepository } from '../../users/user.repository';
 
 export async function handleInvoicePaymentFailed(
   event: Stripe.Event
@@ -23,6 +25,14 @@ export async function handleInvoicePaymentFailed(
     'Invoice payment failed — subscription past_due'
   );
 
-  // In production you'd also send the user an email here:
-  // "Your payment failed — please update your card"
+  // send user email when payment fails
+  const user = await userRepository.findById(stripeIntent.metadata.userId);
+if (user) {
+  await emailService.sendPaymentFailed(user.email, {
+    name: user.name,
+    amount: stripeIntent.amount,
+    currency: stripeIntent.currency,
+    failureReason: failureMessage,
+  });
+}
 }
