@@ -31,4 +31,8 @@ export const env = {
   MPESA_PASSKEY: required('MPESA_PASSKEY'),
   MPESA_CALLBACK_URL: required('MPESA_CALLBACK_URL'),
   MPESA_ENVIRONMENT: (process.env.MPESA_ENVIRONMENT ?? 'sandbox') as 'sandbox' | 'production',
+  
+  RESEND_API_KEY: required('RESEND_API_KEY'),
+  RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev',
+  
 } as const;

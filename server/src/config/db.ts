@@ -8,7 +8,7 @@ export const db = new Pool(
         ssl: { rejectUnauthorized: false }, // required for Neon
         max: 10,
         idleTimeoutMillis: 30000,
-        connectionTimeoutMillis: 2000,
+        connectionTimeoutMillis: 20000,
       }
     : {
         host: env.DB_HOST,
